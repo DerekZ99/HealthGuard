@@ -74,7 +74,7 @@ export default {
                 success() {
                   uni.showToast({
                     title: "您已登录",
-                    icon: "none",
+                    icon: "success",
                   });
                   that.isLogin = true;
                 },
@@ -102,7 +102,7 @@ export default {
             success() {
               uni.showToast({
                 title: "您已登录",
-                icon: "none",
+                icon: "success",
               });
               that.isLogin = true;
             },
