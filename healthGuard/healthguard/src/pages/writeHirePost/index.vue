@@ -178,78 +178,57 @@ export default {
       }
       // 检查表单中是否有非法制，如有有 阻止提交
       if (
-        this.isTextOk &&
-        this.isWorkPlaceOk &&
-        this.isNameOk &&
-        this.isPhoneOk
+        !(
+          this.isTextOk &&
+          this.isWorkPlaceOk &&
+          this.isNameOk &&
+          this.isPhoneOk
+        )
       ) {
-        // 表单内容合法，可以提交
-        uni.showLoading({
-          title: "加载中"
-        });
-        // 判断是长期招聘还是短期
-        const formContent = e.detail.value;
-        if (this.postType === "long") {
-          db.collection("longTermJob").add({
-            data: {
-              post: formContent
-            },
-            success(res) {
-              uni.hideLoading();
-              // post添加到数据库成功
-              uni.showToast({
-                title: "发布成功",
-                icon: "success"
-              });
-              // 发布成功后返回上一级页面
-              setTimeout(() => {
-                wx.navigateBack({
-                  delta: 1
-                });
-              }, 2000);
-            },
-            fail(err) {
-              uni.showToast({
-                title: "发布失败，请检查网络",
-                icon: "none"
-              });
-            }
-          });
-        } else {
-          db.collection("shortTermJob").add({
-            data: {
-              post: formContent
-            },
-            success(res) {
-              uni.hideLoading();
-              // post添加到数据库成功
-              uni.showToast({
-                title: "发布成功",
-                icon: "success"
-              });
-              // 发布成功后返回上一级页面
-              setTimeout(() => {
-                wx.navigateBack({
-                  delta: 1
-                });
-              }, 2000);
-            },
-            fail(err) {
-              uni.showToast({
-                title: "发布失败，请检查网络",
-                icon: "none"
-              });
-            }
-          });
-        }
-      } else {
-        //有非法值 阻止提交
+        // 表单内有为非法值，阻止提交
         uni.showToast({
-          title: "提交失败，表单内容格式不正确",
+          title: "表单格式不正确，请输入正确的格式",
           icon: "none"
         });
         return;
       }
+      // 表单内容合法，可以提交
+      uni.showLoading({
+        title: "加载中"
+      });
+      const formContent = e.detail.value;
+      // 判断是长期招聘还是短期
+      function uploadForm(collection) {
+        db.collection(collection).add({
+          data: {
+            post: formContent,
+            pTime:new Date().getTime()
+          },
+          success(res) {
+            uni.hideLoading();
+            // post添加到数据库成功
+            uni.showToast({
+              title: "发布成功",
+              icon: "success"
+            });
+            // 发布成功后返回上一级页面
+            setTimeout(() => {
+              wx.navigateBack({
+                delta: 1
+              });
+            }, 2000);
+          },
+          fail(err) {
+            uni.showToast({
+              title: "发布失败，请检查网络",
+              icon: "none"
+            });
+          }
+        });
+      }
+      this.postType === "long"
+        ? uploadForm("longTermJob")
+        : uploadForm("shortTermJob");
     },
     bindPickerChange(e) {
       this.index = e.target.value;
@@ -280,7 +259,7 @@ export default {
 .hire-form {
   .form-title {
     color: #000;
-    font-weight: 600;
+    font-weight: bold;
     font-size: 40rpx;
     display: flex;
     justify-content: center;
@@ -294,7 +273,7 @@ export default {
       background-color: #e3e3e3;
       font-size: 34rpx;
       padding: 20rpx 10rpx 10rpx;
-      font-weight: 500;
+      font-weight: bold;
       border: 3rpx solid #666;
     }
     picker {

@@ -102,7 +102,7 @@ export default {
     .text {
       width: 60vw;
       font-size: 32rpx;
-      font-weight: 600;
+      font-weight: bold;
       line-height: 48rpx;
       color: #000;
       margin-bottom: 30rpx;

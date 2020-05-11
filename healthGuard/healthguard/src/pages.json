@@ -1,82 +1,73 @@
 {
-	"pages": [
+  "pages": [
+   
+    {
+      "path": "pages/index/index"
+    },
 		{
-			"path": "pages/writeJobPost/index"
-		},
-	
-		
-		{
-			"path": "pages/index/index"
-		},
-		{
-			"path": "pages/profile/index",
-			"style": {
-				"navigationBarTitleText": "个人内容"
-			}
-		},
-		{
-			"path": "pages/addMore/index",
-			"style": {
-				"navigationBarTitleText": "发布内容"
-			}
-		}, {
-			"path": "pages/serveLongTerm/index",
-			"style": {
-				"navigationBarTitleText": "长期服务"
-			}
-		}, {
-			"path": "pages/serveShortTerm/index",
-			"style": {
-				"navigationBarTitleText": "短期服务"
-			}
-		}, {
-			"path": "pages/healthArticle/index",
-			"style": {
-				"navigationBarTitleText": "养生之道"
-			}
-		}, {
-			"path": "pages/healthCheck/index",
-			"style": {
-				"navigationBarTitleText": "健康检查"
-			}
-		},
-		{
-			"path": "pages/writeHirePost/index"
-		}
-		
-		
-
-
-	],
-	"globalStyle": {
-		"navigationBarTextStyle": "white",
-		"navigationBarTitleText": "健康通",
-		"navigationBarBackgroundColor": "#46bcf9"
-	},
-	"tabBar": {
-		"color": "#8a8a8a",
-		"selectedColor": "#46bcf9",
-		"backgroundColor": "#fff",
-		"position": "bottom",
-		"borderStyle": "black",
-		"list": [{
-				"pagePath": "pages/index/index",
-				"text": "首页",
-				"iconPath": "./static/tabicon/shouye.png",
-				"selectedIconPath": "./static/tabicon/shouye (2).png"
-			},
-			{
-				"pagePath": "pages/addMore/index",
-				"text": "发布",
-				"iconPath": "./static/tabicon/zengjia.png",
-				"selectedIconPath": "./static/tabicon/zengjia (2).png"
-			},
-			{
-				"pagePath": "pages/profile/index",
-				"text": "我的",
-				"iconPath": "./static/tabicon/wode.png",
-				"selectedIconPath": "./static/tabicon/wode (2).png"
-			}
-		]
-	}
+      "path": "pages/service/index"
+    },
+    {
+      "path": "pages/profile/index",
+      "style": {
+        "navigationBarTitleText": "个人内容"
+      }
+    },
+    {
+      "path": "pages/addMore/index",
+      "style": {
+        "navigationBarTitleText": "发布内容"
+      }
+    },
+    {
+      "path": "pages/healthArticle/index",
+      "style": {
+        "navigationBarTitleText": "养生之道"
+      }
+    },
+    {
+      "path": "pages/healthCheck/index",
+      "style": {
+        "navigationBarTitleText": "健康检查"
+      }
+    },
+    {
+      "path": "pages/writeJobPost/index"
+    },
+    {
+      "path": "pages/writeHirePost/index"
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "健康通",
+    "navigationBarBackgroundColor": "#46bcf9"
+  },
+  "tabBar": {
+    "color": "#8a8a8a",
+    "selectedColor": "#46bcf9",
+    "backgroundColor": "#fff",
+    "position": "bottom",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "./static/tabicon/shouye.png",
+        "selectedIconPath": "./static/tabicon/shouye (2).png"
+      },
+      {
+        "pagePath": "pages/addMore/index",
+        "text": "发布",
+        "iconPath": "./static/tabicon/zengjia.png",
+        "selectedIconPath": "./static/tabicon/zengjia (2).png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "./static/tabicon/wode.png",
+        "selectedIconPath": "./static/tabicon/wode (2).png"
+      }
+    ]
+  }
 }

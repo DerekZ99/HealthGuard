@@ -16,10 +16,10 @@
 
     <!-- 信息部分 开始 -->
     <view class="section-box">
-      <navigator url="/pages/serveShortTerm/index" class="section-item">
+      <navigator url="/pages/service/index?id=short" class="section-item">
         短期服务
       </navigator>
-      <navigator url="/pages/serveLongTerm/index" class="section-item">
+      <navigator url="/pages/service/index?id=long" class="section-item">
         长期服务
       </navigator>
       <navigator url="/pages/healthCheck/index" class="section-item">
@@ -78,11 +78,12 @@ export default {
         { text: "“爱的剪刀手”​社区义剪活动", id: 2 },
         { text: "“满天星”​为儿童捐书活动", id: 3 },
       ],
+      timer:""
     };
   },
   onLoad() {
     this.getBanner();
-    setInterval(() => {
+    this.timer = setInterval(() => {
       this.scroll();
     }, 2000);
   },
@@ -104,6 +105,7 @@ export default {
       }, 1000);
     },
   },
+  onHide(){}
 };
 </script>
 
@@ -153,7 +155,7 @@ export default {
     justify-content: center;
     align-items: center;
     font-size: 32rpx;
-    font-weight: 600;
+    font-weight: bold;
     padding-bottom: 15rpx;
     border-bottom: 3rpx solid;
     .title-top {

@@ -15,7 +15,7 @@
             :class="{warning:!isNameOk}"
           />
           <!-- 警告信息 -->
-          <view class="warning-text" v-show="!isNameOk">请不要输入空格或符号</view>
+          <view class="warning-text" v-show="!isNameOk">请不要包含数字，空格或符号</view>
           <!-- 警告信息 -->
         </view>
       </view>
@@ -55,7 +55,10 @@
         <view class="imgShow">
           <img mode="widthFix" :src="imgFilePath" alt />
         </view>
-        <button @click="handleChooseImg" class="chooseImg">选择图片</button>
+        <view class="btnOptions">
+          <button @click="handleChooseImg" class="chooseImg">选择图片</button>
+          <button class="clearImg" @click="handleClearImg">清除图片</button>
+        </view>
       </view>
 
       <view class="btns">
@@ -67,6 +70,8 @@
 </template>
 
 <script>
+const db = wx.cloud.database();
+
 export default {
   data() {
     return {
@@ -74,7 +79,9 @@ export default {
       imgFilePath:
         "cloud://tryout-edov9.7472-tryout-edov9-1302058975/imgHolder.jpg",
       isNameOk: true,
-      isPhoneOk: true
+      isPhoneOk: true,
+      // 用户是否上传了他自己的头像
+      isUpLoadImg: false
     };
   },
   onLoad(options) {
@@ -84,29 +91,112 @@ export default {
   methods: {
     formSubmit(e) {
       let that = this;
-      // console.log(e);
-      wx.cloud.uploadFile({
-        cloudPath: `posterImg/${new Date().getTime()}-${Math.floor(
-          Math.random() * 1000
-        )}`,
-        filePath: that.imgFilePath,
-        success(res) {
-          res.fileID;
-        },
-        fail(err) {
-          console.log(err + "上传失败");
-        }
+      uni.showLoading({
+        title: "表单上传中"
       });
+      // 检查表单里是否有空值
+      if (Object.values(e.detail.value).includes("")) {
+        uni.showToast({
+          title: "请填写完整的表单",
+          icon: "none"
+        });
+        return;
+      }
+      //表单项全部都填了，检查是否有非法值
+      if (!(this.isPhoneOk && this.isNameOk)) {
+        // 有非法值，阻止提交
+        uni.showToast({
+          title: "表单格式不正确，请输入正确的格式",
+          icon: "none"
+        });
+        return;
+      }
+      // 判断用户是否有上传头像
+      if (this.isUpLoadImg) {
+        // 用户有上传头像，先把头像上传到数据库，然后拿到他的fileID并上传数据库
+        wx.cloud.uploadFile({
+          cloudPath: `posterImg/${new Date().getTime()}-${Math.floor(
+            Math.random() * 1000
+          )}`,
+          filePath: that.imgFilePath,
+          success(res) {
+            // 上传头像成功后回调上传数据的函数
+            that.upLoadData(res.fileID, e.detail.value);
+          },
+          fail(err) {
+            console.log(err + "上传失败");
+          }
+        });
+      } else {
+        // 用户没有上传头像，直接调用上传数据的函数
+        this.upLoadData("", e.detail.value);
+      }
     },
     handleChooseImg() {
+      uni.showLoading({
+        title: "加载中"
+      });
       let that = this;
       wx.chooseImage({
         count: 1,
         sizeType: ["original", "compressed"],
         sourceType: ["album", "camera"],
         success(res) {
+          // 用户上传了的头像
+          that.isUpLoadImg = true;
           that.imgFilePath = res.tempFilePaths[0];
+          uni.showToast({
+            title: "已添加头像",
+            icon: "success"
+          });
+        },
+        fail() {
+          uni.hideLoading();
         }
+      });
+    },
+    // 上传数据到数据库
+    upLoadData(img, form) {
+      let userImg = img;
+      function uploadForm(collection) {
+        db.collection(collection).add({
+          data: {
+            post: form,
+            userImg,
+            pTime:new Date().getTime()
+          },
+          success(res) {
+            uni.showToast({
+              title: "提交成功",
+              icon: "success"
+            });
+            // 表单提交成功后退出页面，返回上级
+            setTimeout(() => {
+              wx.navigateBack({
+                delta: 1
+              });
+            }, 2000);
+          },
+          fail(err) {
+            console.log(err);
+            uni.showToast({
+              title: "提交失败，请检查网络"
+            });
+          }
+        });
+      }
+      this.formTitle === "发布短期求职信息"
+        ? uploadForm("shortTermPost")
+        : uploadForm("longTermPost");
+    },
+    // 清除图片
+    handleClearImg() {
+      this.isUpLoadImg = false;
+      this.imgFilePath =
+        "cloud://tryout-edov9.7472-tryout-edov9-1302058975/imgHolder.jpg";
+      uni.showToast({
+        title: "已清除",
+        icon: "success"
       });
     },
     // 正则验证
@@ -128,7 +218,7 @@ export default {
 <style lang="scss" scoped>
 .form-title {
   color: #000;
-  font-weight: 600;
+  font-weight: bold;
   font-size: 40rpx;
   display: flex;
   justify-content: center;
@@ -143,7 +233,7 @@ export default {
     font-size: 30rpx;
 
     .item-title {
-      font-weight: 500;
+      font-weight: bold;
       flex: 0.3;
       display: flex;
       justify-content: flex-end;
@@ -171,20 +261,24 @@ export default {
         width: 100%;
       }
     }
-    .chooseImg {
-      width: 60vw;
+    .btnOptions {
+      display: flex;
       margin: 0 auto;
+      justify-content: space-between;
+      width: 80vw;
+      .chooseImg {
+        width: 38vw;
+      }
+      .clearImg {
+        width: 38vw;
+      }
     }
   }
 
   .btns {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    padding: 40rpx 0;
+    padding: 20rpx 0;
     .sumbitBtn {
-      width: 60vw;
+      width: 80vw;
       margin: 0 auto;
     }
   }
