@@ -11,9 +11,9 @@ export default {
       });
     }
   },
-  onHide() {   
-    wx.clearStorage();
-  },
+  onHide(){
+    wx.clearStorage()
+  }
 };
 </script>
 

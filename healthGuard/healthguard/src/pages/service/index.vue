@@ -42,12 +42,12 @@ export default {
       curTabIndex: 0,
       // 数据参数
       hireParams: {
-        limit: 2,
+        limit: 3,
         skip: 0,
         hasMore: true,
       },
       jobParams: {
-        limit: 2,
+        limit: 3,
         skip: 0,
         hasMore: true,
       },
@@ -81,8 +81,8 @@ export default {
     // 页面滚动到了底部
     handleToLower() {
       uni.showLoading({
-        title:"数据加载中"
-      })
+        title: "数据加载中",
+      });
       // 判断是加载哪个版块需要加载更多内容
       if (this.curTabIndex === 0) {
         // 判断是否有下一页
@@ -113,87 +113,63 @@ export default {
     // 请求招聘数据
     getHire() {
       let that = this;
-      if (this.hireParams.skip === 0) {
-        db.collection(this.hireColpath)
-          .limit(this.hireParams.limit)
-          .get({
-            success(res) {
-              // 数据请求成功后存入本地变量中
-              that.hireInfo.push(...res.data);
-              uni.hideLoading()
-            },
-            fail(err) {
-              console.log(err);
-            },
-          });
-      } else {
-        db.collection(this.hireColpath)
-          .limit(this.hireParams.limit)
-          .skip(this.hireParams.skip)
-          .get({
-            success(res) {
-              // 判断是否还有下一页数据
-              if (res.data.length === 0) {
-                // 没有更多数据了
-                that.hireParams.hasMore = false;
-                uni.showToast({
-                  title: "没有更多数据了",
-                  icon: "none",
-                });
-                return;
-              }
-              // 数据请求成功后存入本地变量中
-              that.hireInfo.push(...res.data);
-              uni.hideLoading()
-            },
-            fail(err) {
-              console.log(err);
-            },
-          });
-      }
+      wx.cloud.callFunction({
+        name: "getHireList",
+        data: {
+          hireColpath: that.hireColpath,
+          limit: that.hireParams.limit,
+          skip: that.hireParams.skip,
+        },
+        success(res) {
+          // 判断是否还有下一页数据
+          if (res.result.data.length === 0) {
+            // 没有更多数据了
+            that.hireParams.hasMore = false;
+            uni.showToast({
+              title: "没有更多数据了",
+              icon: "none",
+            });
+            return;
+          }
+          // 数据请求成功后存入本地变量中
+          that.hireInfo.push(...res.result.data);
+          uni.hideLoading();
+        },
+        fail(err) {
+          console.log(err);
+        },
+      });
     },
     // 请求求职数据
     getJob() {
       let that = this;
-      // 小程序的沙雕设定 skip为0的时候不能带上skip
-      if (this.jobParams.skip === 0) {
-        db.collection(this.JobColpath)
-          .limit(this.jobParams.limit)
-          .get({
-            success(res) {
-              // 数据请求成功后存入本地变量中
-              that.jobInfo.push(...res.data);
-              uni.hideLoading()
-            },
-            fail(err) {
-              console.log(err);
-            },
-          });
-      } else {
-        db.collection(this.JobColpath)
-          .skip(this.jobParams.skip)
-          .limit(this.jobParams.limit)
-          .get({
-            success(res) {
-              // 判断是否还有下一页数据
-              if (res.data.length === 0) {
-                // 没有更多数据了
-                that.jobParams.hasMore = false;
-                uni.showToast({
-                  title: "没有更多数据了",
-                  icon: "none",
-                });
-                return;
-              }
-              // 数据请求成功后存入本地变量中
-              that.jobInfo.push(...res.data);
-              uni.hideLoading()
-            },
-            fail(err) {
-              console.log(err);
-            },
-          });
-      }
+      //通过云函数请求数据库数据
+      wx.cloud.callFunction({
+        name: "getJobList",
+        data: {
+          JobColpath: that.JobColpath,
+          limit: that.jobParams.limit,
+          skip: that.jobParams.skip,
+        },
+        success(res) {
+          // 判断是否还有下一页数据
+          if (res.result.data.length === 0) {
+            // 没有更多数据了
+            that.jobParams.hasMore = false;
+            uni.showToast({
+              title: "没有更多数据了",
+              icon: "none",
+            });
+            return;
+          }
+          // 数据请求成功后存入本地变量中
+          that.jobInfo.push(...res.result.data);
+          uni.hideLoading();
+        },
+        fail(err) {
+          console.log(err);
+        },
+      });
     },
   },
 };

@@ -7,7 +7,7 @@
       alt=""
     />
     <!-- 轮播部分 开始 -->
-    <swiper class="swiper" autoplay indicator-dots circular>
+    <swiper  class="swiper" autoplay indicator-dots circular>
       <swiper-item v-for="item in banner" :key="item._id">
         <img mode="aspectFill" :src="item.img" alt="" />
       </swiper-item>
@@ -83,8 +83,9 @@ export default {
   },
   onLoad() {
     this.getBanner();
+    let that = this
     this.timer = setInterval(() => {
-      this.scroll();
+      that.scroll();
     }, 2000);
   },
   methods: {
@@ -105,7 +106,11 @@ export default {
       }, 1000);
     },
   },
-  onHide(){}
+  onHide(){
+    // 离开页面的时候清除定时器
+    this.timer=[]
+    
+  }
 };
 </script>
 

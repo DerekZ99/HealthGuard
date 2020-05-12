@@ -1,17 +1,18 @@
 {
-  "pages": [
-   
-    {
-      "path": "pages/index/index"
-    },
-		{
-      "path": "pages/service/index"
-    },
-    {
+  "pages": [{
       "path": "pages/profile/index",
       "style": {
         "navigationBarTitleText": "个人内容"
       }
+    },
+    {
+      "path": "pages/index/index"
+    },
+    {
+      "path": "pages/service/index"
+    },
+    {
+      "path": "pages/profileDetail/index"
     },
     {
       "path": "pages/addMore/index",
@@ -49,8 +50,7 @@
     "backgroundColor": "#fff",
     "position": "bottom",
     "borderStyle": "black",
-    "list": [
-      {
+    "list": [{
         "pagePath": "pages/index/index",
         "text": "首页",
         "iconPath": "./static/tabicon/shouye.png",

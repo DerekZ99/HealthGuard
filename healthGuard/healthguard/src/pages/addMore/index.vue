@@ -7,7 +7,11 @@
     />
 
     <!-- 用户信息展示 开始 -->
-    <user-info @login="userLogin" ref="userInfo"></user-info>
+    <user-info
+      ref="userInfo"
+      :isLogin="isUserLogin"
+      @login="userLogin"
+    ></user-info>
     <!-- 用户信息展示 结束 -->
 
     <!-- 发布按钮选择 开始 -->
@@ -16,13 +20,17 @@
       <view class="post-item">
         <view class="text">
           {{
-          isUserLogin
-          ? "您现在可以发布服务信息。注意：请不要发布虚假信息或不良信息。一经发现将追诉法律责任"
-          : "注意：您现在处于未登录状态。授权登录后可发表服务信息"
+            isUserLogin
+              ? "您现在可以发布服务信息。注意：请不要发布虚假信息或不良信息。一经发现将追诉法律责任"
+              : "注意：您现在处于未登录状态。授权登录后可发表服务信息"
           }}
         </view>
-        <button @click="postClick('long')" class="longTerm">发布长期服务</button>
-        <button @click="postClick('short')" class="shortTerm">发布短期服务</button>
+        <button @click="postClick('long')" class="longTerm">
+          发布长期服务
+        </button>
+        <button @click="postClick('short')" class="shortTerm">
+          发布短期服务
+        </button>
       </view>
     </view>
     <!-- 发布按钮选择 结束 -->
@@ -34,21 +42,25 @@ import UserInfo from "@/components/UserInfo";
 
 export default {
   components: {
-    UserInfo
+    UserInfo,
+  },
+  onShow() {
+    this.syncData();
+  },
+  mounted() {
+    this.syncData();
   },
   data() {
     return {
-      isUserLogin: false
+      isUserLogin: false,
     };
   },
+
   methods: {
-    userLogin(event) {
-      this.isUserLogin = !this.isUserLogin;
-    },
     postClick(info) {
-      // 判断用户是否已登录
       if (this.isUserLogin) {
-        // 已登录
+        //用户之前登录过，或者刚刚完成授权登录
+        // 进行页面跳转操作
         wx.showActionSheet({
           itemList: ["发布招聘信息", "发布求职信息"],
           success(res) {
@@ -56,26 +68,42 @@ export default {
             if (res.tapIndex === 0) {
               wx.navigateTo({
                 url: `/pages/writeHirePost/index?id=${info}`,
-                success(res) {}
+                success(res) {},
               });
             } else {
               wx.navigateTo({
                 url: `/pages/writeJobPost/index?id=${info}`,
-                success(res) {}
+                success(res) {},
               });
             }
           },
-          fail(res) {}
         });
       } else {
-        // 没有登录 进行拦截
+        // 用户之前没有登录，或者缓存被清除
+        // 提醒用户点击授权按钮
         uni.showToast({
-          title: "请先授权登录",
-          icon: "none"
+          title: "您还没有登录，请先授权登录",
+          icon: "none",
         });
       }
-    }
-  }
+    },
+    userLogin() {
+      this.isUserLogin = !this.isUserLogin;
+    },
+    syncData() {
+      let that = this;
+      wx.getStorage({
+        key: "isLoginBefore",
+        success(res) {
+          if (res.data === that.isUserLogin) {
+            return;
+          } else {
+            that.isUserLogin = res.data;
+          }
+        },
+      });
+    },
+  },
 };
 </script>
 
