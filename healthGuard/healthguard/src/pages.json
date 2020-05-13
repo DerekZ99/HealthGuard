@@ -1,6 +1,12 @@
 {
   "pages": [
     {
+      "path": "pages/healthArticle/index",
+      "style": {
+        "navigationBarTitleText": "养生之道"
+      }
+    },
+    {
       "path": "pages/index/index"
     },
     {
@@ -23,12 +29,7 @@
         "navigationBarTitleText": "发布内容"
       }
     },
-    {
-      "path": "pages/healthArticle/index",
-      "style": {
-        "navigationBarTitleText": "养生之道"
-      }
-    },
+   
     {
       "path": "pages/healthCheck/index",
       "style": {
