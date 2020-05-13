@@ -1,5 +1,9 @@
 <template>
   <view class="job">
+    <!-- 页表为空占位符 开始 -->
+    <slot name="empty" v-if="jobInfos.length === 0"></slot>
+    <!-- 页表为空占位符 结束 -->
+
     <view class="job-item" v-for="item in jobInfos" :key="item._id">
       <!-- ============内容头部部分 开始============ -->
       <view class="job-header">
@@ -30,12 +34,18 @@
       <!-- -===========内容中间部分 结束-=========== -->
 
       <!--============ 内容底部部分 开始============ -->
+
       <view class="job-footer">
+        <view class="footer-option" v-if="inProfile">
+          <button @click="optionClick(item)" class="delete">
+            删除
+          </button>
+        </view>
+
         <view class="footer-time">发布于 {{ timeFormat(item.pTime) }}</view>
       </view>
     </view>
     <!-- ============内容底部部分 结束============ -->
-    
   </view>
 </template>
 
@@ -48,10 +58,17 @@ export default {
       type: Array,
       default: [],
     },
+    inProfile: {
+      type: Boolean,
+      default: false,
+    },
   },
   methods: {
     timeFormat(time) {
       return moment(time).format("YYYY-MM-DD");
+    },
+    optionClick(item) {
+      this.$emit("opitionClicked", item);
     },
   },
 };
@@ -112,6 +129,19 @@ export default {
     margin-top: 30rpx;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    .footer-option {
+      flex: 1;
+      .delete {
+        float: left;
+        line-height: 50rpx;
+        font-size: 28rpx;
+        color: #fff;
+        width: 120rpx;
+        height: 50rpx;
+        background-color: red;
+      }
+    }
   }
 }
 </style>

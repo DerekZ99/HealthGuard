@@ -27,7 +27,7 @@ export default {
   components: {
     TabControl,
     Hire,
-    Job,
+    Job
   },
   data() {
     return {
@@ -44,13 +44,13 @@ export default {
       hireParams: {
         limit: 3,
         skip: 0,
-        hasMore: true,
+        hasMore: true
       },
       jobParams: {
         limit: 3,
         skip: 0,
-        hasMore: true,
-      },
+        hasMore: true
+      }
     };
   },
 
@@ -58,14 +58,14 @@ export default {
     this.serviceType = options.id;
     if (options.id === "long") {
       wx.setNavigationBarTitle({
-        title: "长期服务",
+        title: "长期服务"
       });
       // 根据option.id给数据库集合名称赋值
       this.hireColpath = "longTermJob";
       this.JobColpath = "longTermPost";
     } else {
       wx.setNavigationBarTitle({
-        title: "短期服务",
+        title: "短期服务"
       });
       this.hireColpath = "shortTermJob";
       this.JobColpath = "shortTermPost";
@@ -76,12 +76,17 @@ export default {
   },
   methods: {
     tabClicked(index) {
-      this.curTabIndex = index;
+      // 防止用户多次点击出现bug
+      if (this.curTabIndex !== index) {
+        this.curTabIndex = index;
+      } else {
+        return;
+      }
     },
     // 页面滚动到了底部
     handleToLower() {
       uni.showLoading({
-        title: "数据加载中",
+        title: "数据加载中"
       });
       // 判断是加载哪个版块需要加载更多内容
       if (this.curTabIndex === 0) {
@@ -93,7 +98,7 @@ export default {
           // 没有下一页
           uni.showToast({
             title: "没有更多数据了",
-            icon: "none",
+            icon: "none"
           });
           return;
         }
@@ -104,7 +109,7 @@ export default {
         } else {
           uni.showToast({
             title: "没有更多数据了",
-            icon: "none",
+            icon: "none"
           });
           return;
         }
@@ -118,7 +123,7 @@ export default {
         data: {
           hireColpath: that.hireColpath,
           limit: that.hireParams.limit,
-          skip: that.hireParams.skip,
+          skip: that.hireParams.skip
         },
         success(res) {
           // 判断是否还有下一页数据
@@ -127,7 +132,7 @@ export default {
             that.hireParams.hasMore = false;
             uni.showToast({
               title: "没有更多数据了",
-              icon: "none",
+              icon: "none"
             });
             return;
           }
@@ -137,7 +142,7 @@ export default {
         },
         fail(err) {
           console.log(err);
-        },
+        }
       });
     },
     // 请求求职数据
@@ -149,7 +154,7 @@ export default {
         data: {
           JobColpath: that.JobColpath,
           limit: that.jobParams.limit,
-          skip: that.jobParams.skip,
+          skip: that.jobParams.skip
         },
         success(res) {
           // 判断是否还有下一页数据
@@ -158,7 +163,7 @@ export default {
             that.jobParams.hasMore = false;
             uni.showToast({
               title: "没有更多数据了",
-              icon: "none",
+              icon: "none"
             });
             return;
           }
@@ -168,10 +173,10 @@ export default {
         },
         fail(err) {
           console.log(err);
-        },
+        }
       });
-    },
-  },
+    }
+  }
 };
 </script>
 

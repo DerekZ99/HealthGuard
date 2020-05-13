@@ -1,6 +1,8 @@
 <template>
   <view class="userInfo">
-    <view class="avatarBg"> <slot></slot></view>
+    <view class="avatarBg">
+      <slot></slot>
+    </view>
 
     <view class="userInfo-detail">
       <open-data type="userAvatarUrl" class="user-avatar"></open-data>
@@ -11,9 +13,7 @@
         lang="zh_CN"
         type="primary"
         @getuserinfo="appLoginWx"
-      >
-        {{ isLogin ? "已登录" : "微信授权登录" }}
-      </button>
+      >{{ isLogin ? "已登录" : "微信授权登录" }}</button>
     </view>
   </view>
 </template>
@@ -24,20 +24,20 @@ export default {
   props: {
     isLogin: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   data() {
     return {};
   },
-  mounted(){
-    let that = this
+  mounted() {
+    let that = this;
     wx.getStorage({
-      key:"isLoginBefore",
-      success(res){
-        that.$emit("login")
+      key: "isLoginBefore",
+      success(res) {
+        that.$emit("login");
       }
-    })
+    });
   },
   methods: {
     // // 用户点击了授权按钮
@@ -45,7 +45,7 @@ export default {
       if (this.isLogin) {
         // 用户已经是登录状态时不执行后面的操作
         uni.showToast({
-          title: "您已是登录状态",
+          title: "您已是登录状态"
         });
         return;
       }
@@ -60,7 +60,7 @@ export default {
         fail(err) {
           //用户点击了拒绝授权
           return;
-        },
+        }
       });
     },
     // 获取用户的openid 检查用户是否存在
@@ -69,48 +69,52 @@ export default {
       wx.cloud.callFunction({
         name: "getUser",
         success(res) {
+          // 先将用户openid存入缓存中（用来查询用户的信息）
+          wx.setStorage({
+            key: "userOpenId",
+            data: res.result.openid
+          });
+          // 利用openid判断数据库中是否有这个用户
           if (res.result.user.data.length === 0) {
             //数据库中没有这个用户，添加这个用户
             db.collection("userList").add({
               data: {
                 name: userInfo.nickName,
                 avatar: userInfo.avatarUrl,
-                openid: res.result.openid,
+                openid: res.result.openid
               },
               success(res) {
                 // 用户添加成功，修改登录状态
                 wx.setStorage({
                   key: "isLoginBefore",
-                  data: true,
+                  data: true
                 });
                 uni.showToast({
                   title: "授权登录成功",
-                  icon: "success",
+                  icon: "success"
                 });
-                // that.isLogin = true;
                 that.$emit("login");
-              },
+              }
             });
           } else {
             // 数据库中有这个用户，修改登录状态
             wx.setStorage({
               key: "isLoginBefore",
-              data: true,
+              data: true
             });
             uni.showToast({
               title: "授权登录成功",
-              icon: "success",
+              icon: "success"
             });
-            // that.isLogin = true;
             that.$emit("login");
           }
         },
         fail(err) {
           console.log(err);
-        },
+        }
       });
-    },
-  },
+    }
+  }
 };
 </script>
 
