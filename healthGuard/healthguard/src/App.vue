@@ -12,7 +12,9 @@ export default {
     }
   },
   onHide(){
-    wx.clearStorage()
+    // 测试
+    console.log(1);
+    // wx.clearStorage()
   }
 };
 </script>
