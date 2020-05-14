@@ -85,9 +85,6 @@ export default {
     },
     // 页面滚动到了底部
     handleToLower() {
-      uni.showLoading({
-        title: "数据加载中"
-      });
       // 判断是加载哪个版块需要加载更多内容
       if (this.curTabIndex === 0) {
         // 判断是否有下一页
@@ -118,6 +115,9 @@ export default {
     // 请求招聘数据
     getHire() {
       let that = this;
+       uni.showLoading({
+        title: "数据加载中"
+      });
       wx.cloud.callFunction({
         name: "getHireList",
         data: {
@@ -148,6 +148,9 @@ export default {
     // 请求求职数据
     getJob() {
       let that = this;
+       uni.showLoading({
+        title: "数据加载中"
+      });
       //通过云函数请求数据库数据
       wx.cloud.callFunction({
         name: "getJobList",

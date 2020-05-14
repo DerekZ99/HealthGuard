@@ -1,9 +1,18 @@
 {
-  "pages": [
-   
-    
+  "pages": [{
+      "path": "pages/healthCheck/index",
+      "style": {
+        "navigationBarTitleText": "健康检查"
+      }
+    },
     {
       "path": "pages/index/index"
+    },
+    {
+      "path": "pages/profileDetail/index"
+    },
+    {
+      "path": "pages/writeFeedback/index"
     },
     {
       "path": "pages/healthArticle/index",
@@ -20,10 +29,8 @@
         "navigationBarTitleText": "个人内容"
       }
     },
-    {
-      "path": "pages/profileDetail/index"
-    },
-    
+
+
     {
       "path": "pages/service/index"
     },
@@ -34,13 +41,8 @@
         "navigationBarTitleText": "发布内容"
       }
     },
-   
-    {
-      "path": "pages/healthCheck/index",
-      "style": {
-        "navigationBarTitleText": "健康检查"
-      }
-    },
+
+
     {
       "path": "pages/writeJobPost/index"
     },

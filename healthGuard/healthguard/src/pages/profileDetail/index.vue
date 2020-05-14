@@ -31,8 +31,7 @@ export default {
   },
   data() {
     return {
-      // 这里写死了，要改成空值
-      profileId: ""
+      profileId: "about"
     };
   }
 };
