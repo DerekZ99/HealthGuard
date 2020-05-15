@@ -1,48 +1,52 @@
 <template>
   <view class="addmore">
-    <img
-      class="appbg"
-      src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/appbg/u=2216231013,1490844489&fm=26&gp=0.jpg"
-      alt
-    />
+    <swiper-action @swiperAction="handleSwip">
+      <img
+        class="appbg"
+        src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/appbg/u=2216231013,1490844489&fm=26&gp=0.jpg"
+        alt
+      />
 
-    <!-- 用户信息展示 开始 -->
-    <user-info
-      ref="userInfo"
-      :isLogin="isUserLogin"
-      @login="userLogin"
-    ></user-info>
-    <!-- 用户信息展示 结束 -->
+      <!-- 用户信息展示 开始 -->
+      <user-info
+        ref="userInfo"
+        :isLogin="isUserLogin"
+        @login="userLogin"
+      ></user-info>
+      <!-- 用户信息展示 结束 -->
 
-    <!-- 发布按钮选择 开始 -->
+      <!-- 发布按钮选择 开始 -->
 
-    <view class="post">
-      <view class="post-item">
-        <view class="text">
-          {{
-            isUserLogin
-              ? "您现在可以发布服务信息。注意：请不要发布虚假信息或不良信息。一经发现将追诉法律责任"
-              : "注意：您现在处于未登录状态。授权登录后可发表服务信息"
-          }}
+      <view class="post">
+        <view class="post-item">
+          <view class="text">
+            {{
+              isUserLogin
+                ? "您现在可以发布服务信息。注意：请不要发布虚假信息或不良信息。一经发现将追诉法律责任"
+                : "注意：您现在处于未登录状态。授权登录后可发表服务信息"
+            }}
+          </view>
+          <button @click="postClick('long')" class="longTerm">
+            发布长期服务
+          </button>
+          <button @click="postClick('short')" class="shortTerm">
+            发布短期服务
+          </button>
         </view>
-        <button @click="postClick('long')" class="longTerm">
-          发布长期服务
-        </button>
-        <button @click="postClick('short')" class="shortTerm">
-          发布短期服务
-        </button>
       </view>
-    </view>
-    <!-- 发布按钮选择 结束 -->
+      <!-- 发布按钮选择 结束 -->
+    </swiper-action>
   </view>
 </template>
 
 <script>
 import UserInfo from "@/components/UserInfo";
+import SwiperAction from "components/swiperAction";
 
 export default {
   components: {
     UserInfo,
+    SwiperAction,
   },
   onShow() {
     this.syncData();
@@ -90,6 +94,19 @@ export default {
     userLogin() {
       this.isUserLogin = !this.isUserLogin;
     },
+    // 手指滑动跳转tab
+    handleSwip(e){
+      if(e.direction==="left"){
+         wx.switchTab({
+          url: "/pages/profile/index",
+        });
+      }else {
+        wx.switchTab({
+          url: "/pages/index/index",
+        });
+      }
+    },
+    // 同步登录状态
     syncData() {
       let that = this;
       wx.getStorage({

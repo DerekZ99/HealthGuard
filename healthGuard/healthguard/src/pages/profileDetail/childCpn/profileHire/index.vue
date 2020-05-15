@@ -1,15 +1,21 @@
 <template>
-<!-- ===================HIRE=================== -->
+  <!-- ===================HIRE=================== -->
   <view class="hire">
     <!-- ================tab栏 开始================ -->
-    <tab-control :titles="tabTitle" @tabClick="tabClicked"></tab-control>
+    <tab-control ref="tabControl" :titles="tabTitle" @tabClick="tabClicked"></tab-control>
     <!-- ================tab栏 结束================ -->
 
     <!-- ==============招聘内容部分 开始============== -->
     <scroll-view @scrolltolower="handleToLower" scroll-y class="hire-content">
-      <Hire @opitionClicked="optionClick" :inProfile="true" :hireInfos="curTabIndex===0?longTermInfo:shortTermInfo">
-        <view class="empty" slot="empty">列表空空如也，快去发布信息吧</view>
-      </Hire>
+      <swiper-action @swiperAction="handleSwip">
+        <Hire
+          @opitionClicked="optionClick"
+          :inProfile="true"
+          :hireInfos="curTabIndex === 0 ? longTermInfo : shortTermInfo"
+        >
+          <view class="empty" slot="empty">列表空空如也，快去发布信息吧</view>
+        </Hire>
+      </swiper-action>
     </scroll-view>
     <!-- ==============招聘内容部分 结束============== -->
   </view>
@@ -17,6 +23,7 @@
 
 <script>
 import TabControl from "components/TabControl";
+import SwiperAction from "components/swiperAction";
 // 引入求职模板
 import Hire from "pages/service/childCpn/hire/index";
 
@@ -25,6 +32,7 @@ export default {
   components: {
     TabControl,
     Hire,
+    SwiperAction,
   },
   data() {
     return {
@@ -194,9 +202,9 @@ export default {
               });
             that.getLongTermList();
             uni.showToast({
-              title:"删除成功",
-              icon:"none"
-            })
+              title: "删除成功",
+              icon: "none",
+            });
           } else {
             (that.shortTermInfo = []),
               (that.shortTermParams = {
@@ -206,9 +214,9 @@ export default {
               });
             that.getShortTermList();
             uni.showToast({
-              title:"删除成功",
-              icon:"none"
-            })
+              title: "删除成功",
+              icon: "none",
+            });
           }
         },
         fail(err) {
@@ -219,6 +227,22 @@ export default {
           });
         },
       });
+    },
+     // 手指滑动换页
+    handleSwip(e) {
+       if (e.direction === "right" && this.curTabIndex === 1) {
+        // 手指向右滑动，页面向左
+        this.curTabIndex = 0;
+        this.$refs.tabControl.curIndex = 0
+      } else if (e.direction === "left" && this.curTabIndex === 0) {
+        this.curTabIndex = 1;
+        this.$refs.tabControl.curIndex = 1
+      } else {
+        uni.showToast({
+          title: "没有页面啦，不要再滑啦！",
+          icon:"none"
+        });
+      }
     },
   },
 };

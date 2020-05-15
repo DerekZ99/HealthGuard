@@ -1,17 +1,23 @@
 <template>
   <view class="service">
     <!-- ============tab 开始============ -->
-    <tab-control @tabClick="tabClicked" :titles="tabItems"></tab-control>
+    <tab-control
+      ref="tabControl"
+      @tabClick="tabClicked"
+      :titles="tabItems"
+    ></tab-control>
     <!-- ============tab 结束============ -->
 
     <!-- ============信息内容 开始============ -->
     <scroll-view @scrolltolower="handleToLower" scroll-y class="content">
-      <view v-show="curTabIndex === 1">
-        <Hire :hireInfos="hireInfo"></Hire>
-      </view>
-      <view v-show="curTabIndex === 0">
-        <Job :jobInfos="jobInfo"></Job>
-      </view>
+      <swiper-action @swiperAction="handleSwip">
+        <view v-show="curTabIndex === 1">
+          <Hire :hireInfos="hireInfo"></Hire>
+        </view>
+        <view v-show="curTabIndex === 0">
+          <Job :jobInfos="jobInfo"></Job>
+        </view>
+      </swiper-action>
     </scroll-view>
     <!-- ============信息内容 结束============ -->
   </view>
@@ -21,13 +27,15 @@
 import TabControl from "components/TabControl";
 import Hire from "./childCpn/hire/index";
 import Job from "./childCpn/job/index";
+import SwiperAction from "components/swiperAction";
 
 const db = wx.cloud.database();
 export default {
   components: {
     TabControl,
     Hire,
-    Job
+    Job,
+    SwiperAction,
   },
   data() {
     return {
@@ -44,13 +52,13 @@ export default {
       hireParams: {
         limit: 3,
         skip: 0,
-        hasMore: true
+        hasMore: true,
       },
       jobParams: {
         limit: 3,
         skip: 0,
-        hasMore: true
-      }
+        hasMore: true,
+      },
     };
   },
 
@@ -58,14 +66,14 @@ export default {
     this.serviceType = options.id;
     if (options.id === "long") {
       wx.setNavigationBarTitle({
-        title: "长期服务"
+        title: "长期服务",
       });
       // 根据option.id给数据库集合名称赋值
       this.hireColpath = "longTermJob";
       this.JobColpath = "longTermPost";
     } else {
       wx.setNavigationBarTitle({
-        title: "短期服务"
+        title: "短期服务",
       });
       this.hireColpath = "shortTermJob";
       this.JobColpath = "shortTermPost";
@@ -95,7 +103,7 @@ export default {
           // 没有下一页
           uni.showToast({
             title: "没有更多数据了",
-            icon: "none"
+            icon: "none",
           });
           return;
         }
@@ -106,7 +114,7 @@ export default {
         } else {
           uni.showToast({
             title: "没有更多数据了",
-            icon: "none"
+            icon: "none",
           });
           return;
         }
@@ -115,15 +123,15 @@ export default {
     // 请求招聘数据
     getHire() {
       let that = this;
-       uni.showLoading({
-        title: "数据加载中"
+      uni.showLoading({
+        title: "数据加载中",
       });
       wx.cloud.callFunction({
         name: "getHireList",
         data: {
           hireColpath: that.hireColpath,
           limit: that.hireParams.limit,
-          skip: that.hireParams.skip
+          skip: that.hireParams.skip,
         },
         success(res) {
           // 判断是否还有下一页数据
@@ -132,7 +140,7 @@ export default {
             that.hireParams.hasMore = false;
             uni.showToast({
               title: "没有更多数据了",
-              icon: "none"
+              icon: "none",
             });
             return;
           }
@@ -142,14 +150,14 @@ export default {
         },
         fail(err) {
           console.log(err);
-        }
+        },
       });
     },
     // 请求求职数据
     getJob() {
       let that = this;
-       uni.showLoading({
-        title: "数据加载中"
+      uni.showLoading({
+        title: "数据加载中",
       });
       //通过云函数请求数据库数据
       wx.cloud.callFunction({
@@ -157,7 +165,7 @@ export default {
         data: {
           JobColpath: that.JobColpath,
           limit: that.jobParams.limit,
-          skip: that.jobParams.skip
+          skip: that.jobParams.skip,
         },
         success(res) {
           // 判断是否还有下一页数据
@@ -166,7 +174,7 @@ export default {
             that.jobParams.hasMore = false;
             uni.showToast({
               title: "没有更多数据了",
-              icon: "none"
+              icon: "none",
             });
             return;
           }
@@ -176,10 +184,25 @@ export default {
         },
         fail(err) {
           console.log(err);
-        }
+        },
       });
-    }
-  }
+    },
+    handleSwip(e) {
+      if (e.direction === "right" && this.curTabIndex === 1) {
+        // 手指向右滑动，页面向左
+        this.curTabIndex = 0;
+        this.$refs.tabControl.curIndex = 0
+      } else if (e.direction === "left" && this.curTabIndex === 0) {
+        this.curTabIndex = 1;
+        this.$refs.tabControl.curIndex = 1
+      } else {
+        uni.showToast({
+          title: "没有页面啦，不要再滑啦！",
+          icon:"none"
+        });
+      }
+    },
+  },
 };
 </script>
 

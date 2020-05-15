@@ -1,74 +1,86 @@
 <template>
   <view class="content">
-    <!-- 背景图 -->
-    <img
-      class="bgImg"
-      src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/appbg/indexbg.jpg"
-      alt=""
-    />
-    <!-- 轮播部分 开始 -->
-    <swiper  class="swiper" autoplay indicator-dots circular>
-      <swiper-item v-for="item in banner" :key="item._id">
-        <img mode="aspectFill" :src="item.img" alt="" />
-      </swiper-item>
-    </swiper>
-    <!-- 轮播部分 结束 -->
+    <swiper-action @swiperAction="handleSwip">
+      <!-- 背景图 -->
+      <img
+        class="bgImg"
+        src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/appbg/indexbg.jpg"
+        alt=""
+      />
+      <!-- 轮播部分 开始 -->
+      <swiper class="swiper" autoplay indicator-dots circular>
+        <swiper-item v-for="item in banner" :key="item._id">
+          <img mode="aspectFill" :src="item.img" alt="" />
+        </swiper-item>
+      </swiper>
+      <!-- 轮播部分 结束 -->
 
-    <!-- 信息部分 开始 -->
-    <view class="section-box">
-      <navigator url="/pages/service/index?id=short" class="section-item">
-        短期服务
-      </navigator>
-      <navigator url="/pages/service/index?id=long" class="section-item">
-        长期服务
-      </navigator>
-      <navigator url="/pages/healthCheck/index" class="section-item">
-        健康检查
-      </navigator>
-      <navigator url="/pages/healthArticle/index" class="section-item">
-        养生之道
-      </navigator>
-    </view>
-    <!-- 信息部分 结束 -->
+      <!-- 信息部分 开始 -->
+      <view class="section-box">
+        <navigator url="/pages/service/index?id=short" class="section-item">
+          短期服务
+        </navigator>
+        <navigator url="/pages/service/index?id=long" class="section-item">
+          长期服务
+        </navigator>
+        <navigator url="/pages/healthCheck/index" class="section-item">
+          健康检查
+        </navigator>
+        <navigator url="/pages/healthArticle/index" class="section-item">
+          养生之道
+        </navigator>
+      </view>
+      <!-- 信息部分 结束 -->
 
-    <!-- 公告部分 开始 -->
-    <view class="news">
-      <!-- 公告标题部分 -->
-      <view class="news-title">
-        <view class="title-top">
-          社区公告
-          <img
-            class="tabIcon"
-            src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/globalIcon/louder_flat.png"
-            alt=""
-          />
+      <!-- 公告部分 开始 -->
+      <view class="news">
+        <!-- 公告标题部分 -->
+        <view class="news-title">
+          <view class="title-top">
+            社区公告
+            <img
+              class="tabIcon"
+              src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/globalIcon/louder_flat.png"
+              alt=""
+            />
+          </view>
+        </view>
+        <!-- 公告内容部分 -->
+        <view class="new-content">
+          <ul :class="{ anim: animation }">
+            <li v-for="item in newList" :key="item.id" class="news-item">
+              ● {{ item.text }}
+            </li>
+          </ul>
         </view>
       </view>
-      <!-- 公告内容部分 -->
-      <view class="new-content">
-        <ul :class="{ anim: animation }">
-          <li v-for="item in newList" :key="item.id" class="news-item">
-            ● {{ item.text }}
-          </li>
-        </ul>
-      </view>
-    </view>
-    <!-- 公告部分 结束 -->
+      <!-- 公告部分 结束 -->
 
-    <!-- 二维码部分 开始 -->
-    <view class="join">
-      <img show-menu-by-longpress mode="widthFix" class="code" src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/dcode.jpg" alt="">
-      <text class="join-text">
-        加入我们
-      </text>
-    </view>
-    <!-- 二维码部分 结束 -->
+      <!-- 二维码部分 开始 -->
+      <view class="join">
+        <img
+          show-menu-by-longpress
+          mode="widthFix"
+          class="code"
+          src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/dcode.jpg"
+          alt=""
+        />
+        <text class="join-text">
+          加入我们
+        </text>
+      </view>
+      <!-- 二维码部分 结束 -->
+    </swiper-action>
   </view>
 </template>
 
 <script>
+import SwiperAction from "components/swiperAction";
 const db = wx.cloud.database();
 export default {
+  components: {
+    SwiperAction,
+  },
   data() {
     return {
       banner: [],
@@ -78,12 +90,12 @@ export default {
         { text: "“爱的剪刀手”​社区义剪活动", id: 2 },
         { text: "“满天星”​为儿童捐书活动", id: 3 },
       ],
-      timer:""
+      timer: "",
     };
   },
   onLoad() {
     this.getBanner();
-    let that = this
+    let that = this;
     this.timer = setInterval(() => {
       that.scroll();
     }, 2000);
@@ -105,12 +117,32 @@ export default {
         this.animation = false;
       }, 1000);
     },
+    // 手指滑动换页
+    handleSwip(e) {
+      if (e.direction === "left") {
+        wx.switchTab({
+          url: "/pages/addMore/index",
+        });        
+      } else {
+        uni.showToast({
+          title: "左边没页面啦！",
+          icon: "none",
+        });
+      }
+    },
   },
-  onHide(){
+  onHide() {
     // 离开页面的时候清除定时器
-    this.timer=[]
-    
-  }
+    this.timer = [];
+  },
+  onShareAppMessage() {
+    return {
+      title: "健康通，守护您的健康",
+      path: "/pages/index/index",
+      imageUrl:
+        "https://7472-tryout-edov9-1302058975.tcb.qcloud.la/banner/2girls.jpg?sign=28137c71e41d4de403e1e8e53499a034&t=1589547171",
+    };
+  },
 };
 </script>
 
@@ -184,9 +216,6 @@ export default {
       font-size: 32rpx;
       margin: 10rpx 0;
     }
-    // .news-item:nth-child(even) {
-    //   background-color: #f0f0f0;
-    // }
   }
 }
 // 动画滚动

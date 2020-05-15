@@ -27,7 +27,6 @@ export default {
   onLoad(options) {
     this.profileId = options.id;
     //判断加载哪一些数据
-
   },
   data() {
     return {
@@ -38,4 +37,5 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
 </style>

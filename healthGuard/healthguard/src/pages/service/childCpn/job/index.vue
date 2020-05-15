@@ -3,7 +3,6 @@
     <!-- 页表为空占位符 开始 -->
     <slot name="empty" v-if="jobInfos.length === 0"></slot>
     <!-- 页表为空占位符 结束 -->
-
     <view class="job-item" v-for="item in jobInfos" :key="item._id">
       <!-- ============内容头部部分 开始============ -->
       <view class="job-header">
@@ -51,6 +50,8 @@
 
 <script>
 import moment from "moment";
+// 滑动模块
+
 
 export default {
   props: {
