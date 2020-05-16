@@ -1,50 +1,77 @@
 <template>
   <view class="health-check">
+    <!-- ================背景图 开始================ -->
+    <img
+      class="healthBg"
+      src="http://ku.90sjimg.com/back_pic/04/13/19/85581d8220c581c.jpg%21/fwfh/804x1429/quality/90/unsharp/true/compress/true"
+      alt
+    />
+    <!-- ================背景图 结束================ -->
+
     <!-- ==============用户登录模块 开始============== -->
-    <view class="login-section" v-if="!isUserLogin">
+    <view>
       <user-info :isLogin="isUserLogin" @login="userLogin"></user-info>
-      <view class="login-text">您现在还没有登录，登录后可填写健康调查问卷</view>
     </view>
     <!-- ==============用户登录模块 结束============== -->
 
-    <!-- ================健康调查问卷 开始================ -->
-    <health-survey v-if="isUserLogin && noSurvey"></health-survey>
-    <!-- ================健康调查问卷 开始================ -->
+    <!-- ==============问卷填写入口 开始============== -->
+    <view class="survey">
+      <view v-if="noSurvey" class="no-survey">
+        <view class="survey-text">{{
+          isUserLogin
+            ? "您已登录，但是还没有填写健康调查问卷，点击下方按钮填写健康调查问卷"
+            : "您还没有登录，登录后可点击下方按钮填写调查问卷"
+        }}</view>
+        <view class="surveyBtn">
+          <button @click="handleJump('healthSurvey')" :disabled="!isUserLogin">
+            填写健康调查问卷
+          </button>
+        </view>
+      </view>
+      <view v-else class="has-survey">您已填写过健康调查问卷</view>
+    </view>
+    <!-- ==============问卷填写入口 结束============== -->
 
-    <!-- ==========已填写表单后所展示的信息 开始========== -->
-    <view v-if="!noSurvey" class="form-filled">您已填写过问卷，可以去别的地方逛逛哟</view>
-    <!-- ==========已填写表单后所展示的信息 解释========== -->
+    <!-- 医生问答入口 开始 -->
+    <view class="healthcare">
+      <view class="text">
+        {{ isUserLogin ? "名医解答板块是健康通为用户提供的线上问诊功能，您现在已登录，可前往名医解答版块寻求专业医生解答" : "名医解答板块是健康通为用户提供的线上问诊功能，登录后可前往名医解答版块寻求专业医生解答" }}
+      </view>
+      <view class="entryBtn">
+        <button @click="handleJump('healthSection')" :disabled="!isUserLogin">前往名医解答版块</button>
+      </view>
+    </view>
+    <!-- 医生问答入口 结束 -->
   </view>
 </template>
 
 <script>
-import HealthSurvey from "./childCpn/healthSurvey/index";
 import UserInfo from "components/UserInfo";
 
 const db = wx.cloud.database();
 export default {
   components: {
-    HealthSurvey,
-    UserInfo
+    UserInfo,
   },
   onShow() {
     this.syncData();
+    this.checkForm();
   },
   mounted() {
     this.syncData();
-    this.checkForm();
+    // this.checkForm();
   },
   data() {
     return {
       isUserLogin: false,
       // 判断用户有没有填过表格,true=没填过，false=填过
-      noSurvey: true
+      noSurvey: true,
     };
   },
   watch: {
     isUserLogin() {
       this.checkForm();
-    }
+    },
   },
   methods: {
     userLogin() {
@@ -59,7 +86,7 @@ export default {
           // 利用openid查询数据库该用户是否提交过问卷
           db.collection("healthSurvey")
             .where({
-              _openid: res.data
+              _openid: res.data,
             })
             .get({
               success(res) {
@@ -75,11 +102,11 @@ export default {
                 // 查询失败
                 uni.showToast({
                   title: "加载失败，请检查网路",
-                  icon: "none"
+                  icon: "none",
                 });
-              }
+              },
             });
-        }
+        },
       });
     },
     // 同步登录状态
@@ -93,36 +120,77 @@ export default {
           } else {
             that.isUserLogin = res.data;
           }
-        }
+        },
       });
-    }
-  }
+    },
+    // 填写问卷按钮被点击，跳转到问卷页面
+    handleJump(page) {
+      wx.navigateTo({
+        url: `/pages/${page}/index`,
+      });
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 .health-check {
-  background-color: #f7f7f7;
   height: 100vh;
-  .login-section {
-    .login-text {
+  padding: 0 30rpx;
+
+  .healthBg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: -1;
+  }
+
+  .survey {
+    background-color: #fff;
+    padding: 20rpx 40rpx;
+    border-radius: 40rpx;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    .no-survey {
+      .survey-text {
+        color: #000;
+        font-size: 32rpx;
+      }
+
+      .surveyBtn {
+        button {
+          margin-top: 20rpx;
+          width: 60%;
+        }
+      }
+    }
+
+    .has-survey {
       display: flex;
       justify-content: center;
-      font-size: 30rpx;
       color: #000;
-      text-align: center;
+      font-size: 32rpx;
     }
   }
-  .form-filled {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    font-size: 30rpx;
-    color: #000;
+
+  .healthcare {
+    margin: 60rpx 0;
+    background-color: #fff;
+    padding: 20rpx 40rpx;
+    border-radius: 40rpx;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    .text {
+      color: #000;
+      font-size: 32rpx;
+    }
+
+    .entryBtn {
+      button {
+        margin-top: 20rpx;
+        width: 60%;
+      }
+    }
   }
 }
 </style>

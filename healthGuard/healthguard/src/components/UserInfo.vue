@@ -59,6 +59,7 @@ export default {
         },
         fail(err) {
           //用户点击了拒绝授权
+          uni.hideLoading()
           return;
         }
       });

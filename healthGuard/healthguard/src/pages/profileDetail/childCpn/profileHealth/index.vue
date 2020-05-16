@@ -36,7 +36,7 @@ export default {
     };
   },
   mounted() {
-    this.getSurvey()
+    this.getSurvey();
   },
   methods: {
     timeFormat(time) {
@@ -44,7 +44,10 @@ export default {
     },
     // 用户点击了删除问卷按钮
     handleDelete() {
-      let that = this
+      let that = this;
+      uni.showLoading({
+        title: "删除中",
+      });
       wx.cloud.callFunction({
         name: "deletPost",
         data: {
@@ -53,58 +56,58 @@ export default {
         },
         success(res) {
           uni.showToast({
-            title:"删除成功",
-            icon:"none"
-          })
-          that.getSurvey()
+            title: "删除成功",
+            icon: "success",
+          });
+          that.getSurvey();
+        },
+        fail(err) {
+          uni.showToast({
+            title: "删除失败，请检查网络",
+            icon: "none",
+          });
         },
       });
     },
     // 查询问卷
-    async getSurvey() {
+    getSurvey() {
       let that = this;
-
-      // 根据openid查询用户提交的健康问卷(async await 写法)
-      let openid = "";
-      await wx.getStorage({
+      // 根据openid查询用户提交的健康问卷(回调地狱写法)
+      wx.getStorage({
         key: "userOpenId",
         success(res) {
-          openid = res.data;
+          db.collection("healthSurvey")
+            .where({
+              _openid: res.data,
+            })
+            .get({
+              success(res) {
+                if (res.data.length === 0) {
+                  // 用户没有填过问卷
+                  that.hasSurvey = false;
+                } else {
+                  // 用户填写了问卷
+                  that.hasSurvey = true;
+                  that.surveyInfo = res.data[0];
+                }
+              },
+              fail(err) {
+                uni.showToast({
+                  title: "查询失败，请检查网络",
+                  icon: "none",
+                });
+                console.log(err);
+              },
+            });
         },
       });
-
-      // 查询用户提交的问卷
-      await db
-        .collection("healthSurvey")
-        .where({
-          _openid: openid,
-        })
-        .get({
-          success(res) {
-            if (res.data.length === 0) {
-              // 用户没有填过表格
-              that.hasSurvey = false;
-            } else {
-              // 数据库查到用户填过的表格
-              that.hasSurvey = true;
-              that.surveyInfo = res.data[0];
-              console.log(that.surveyInfo);
-            }
-          },
-          fail(err) {
-            uni.showToast({
-              title: "查询失败，请检查网路",
-              icon: "none",
-            });
-          },
-        });
     },
     // 跳转到问卷填写页面
-    jumpToSurvey(){
+    jumpToSurvey() {
       wx.navigateTo({
-        url:"/pages/healthCheck/index"
-      })
-    }
+        url: "/pages/healthSurvey/index",
+      });
+    },
   },
 };
 </script>
@@ -174,14 +177,13 @@ export default {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   text-align: center;
   button {
-      
-        margin-top: 20rpx;
-        font-size: 28rpx;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 60%;
-        height: 60%;
+    margin-top: 20rpx;
+    font-size: 28rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60%;
+    height: 60%;
   }
 }
 </style>

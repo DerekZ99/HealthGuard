@@ -472,7 +472,7 @@ export default {
           });
           setTimeout(() => {
             wx.navigateBack({
-              delta: 2
+              delta: 1
             });
           }, 1500);
         }

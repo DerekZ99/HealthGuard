@@ -1,8 +1,19 @@
 {
   "pages": [
-
+    {
+      "path": "pages/healthSection/index",
+      "style": {
+        "navigationBarTitleText": "名医解答"
+      }
+    },
     {
       "path": "pages/index/index"
+    },
+    {
+      "path": "pages/healthCheck/index",
+      "style": {
+        "navigationBarTitleText": "健康检查"
+      }
     },
     {
       "path": "pages/profile/index",
@@ -16,17 +27,15 @@
         "navigationBarTitleText": "发布内容"
       }
     },
-    {
-      "path": "pages/healthCheck/index",
-      "style": {
-        "navigationBarTitleText": "健康检查"
-      }
-    },
+
     {
       "path": "pages/profileDetail/index"
     },
     {
-      "path": "pages/writeFeedback/index"
+      "path": "pages/writeFeedback/index",
+      "style": {
+        "navigationBarTitleText": "意见反馈"
+      }
     },
     {
       "path": "pages/healthArticle/index",
@@ -45,6 +54,12 @@
     },
     {
       "path": "pages/writeHirePost/index"
+    },
+    {
+      "path": "pages/writeHealthPost/index"
+    },
+    {
+      "path": "pages/healthSurvey/index"
     }
   ],
   "globalStyle": {
@@ -58,7 +73,8 @@
     "backgroundColor": "#fff",
     "position": "bottom",
     "borderStyle": "black",
-    "list": [{
+    "list": [
+      {
         "pagePath": "pages/index/index",
         "text": "首页",
         "iconPath": "./static/tabicon/shouye.png",
