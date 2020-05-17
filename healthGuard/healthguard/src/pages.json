@@ -1,5 +1,22 @@
 {
   "pages": [
+    
+    {
+      "path": "pages/profileDetail/index"
+    },
+    {
+      "path": "pages/index/index"
+    },
+    
+    {
+      "path": "pages/healthCheck/index",
+      "style": {
+        "navigationBarTitleText": "健康检查"
+      }
+    },
+    {
+      "path": "pages/writeHealthPost/index"
+    },
     {
       "path": "pages/healthSection/index",
       "style": {
@@ -7,13 +24,7 @@
       }
     },
     {
-      "path": "pages/index/index"
-    },
-    {
-      "path": "pages/healthCheck/index",
-      "style": {
-        "navigationBarTitleText": "健康检查"
-      }
+      "path": "pages/healthSectionDetail/index"
     },
     {
       "path": "pages/profile/index",
@@ -29,9 +40,6 @@
     },
 
     {
-      "path": "pages/profileDetail/index"
-    },
-    {
       "path": "pages/writeFeedback/index",
       "style": {
         "navigationBarTitleText": "意见反馈"
@@ -43,6 +51,7 @@
         "navigationBarTitleText": "养生之道"
       }
     },
+    
     {
       "path": "pages/articleDetail/index"
     },
@@ -54,9 +63,6 @@
     },
     {
       "path": "pages/writeHirePost/index"
-    },
-    {
-      "path": "pages/writeHealthPost/index"
     },
     {
       "path": "pages/healthSurvey/index"

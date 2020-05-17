@@ -21,6 +21,46 @@
       <button @click="jumpToSurvey">填写问卷</button>
     </view>
     <!-- =============没有问卷时显示 结束============= -->
+
+    <view class="health-question">
+      <view class="question-header">我的咨询</view>
+      <view v-if="hasQuestion" class="has-question">
+        <view class="question-title">
+          {{ questionInfo.title }}
+        </view>
+        <view class="poster-info">
+          发布于{{ timeFormat(questionInfo.pTime) }} | 年龄：{{
+            questionInfo.age
+          }}岁 | 性别：{{ questionInfo.sex }}
+        </view>
+        <view class="poster-desc">
+          <view class="desc-title">健康咨询描述：</view>
+          <view class="desc-detail">
+            {{ questionInfo.detail }}
+          </view>
+        </view>
+        <view class="reply">
+          <view class="replay-title">
+            医生回复区
+          </view>
+          
+        </view>
+        <view class="poster-img">
+          <img
+            v-for="(item, index) in questionInfo.img"
+            :key="index"
+            :src="item"
+            mode="widthFix"
+          />
+        </view>
+      </view>
+      <view v-else class="no-question">
+        <view class="text">
+          您还没有在名医解答版块咨询问题。若您有健康方面的问题想咨询医生可点击下方按钮进入名医解答版块寻求帮助
+        </view>
+        <button>前往名医解答版块</button>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -32,11 +72,14 @@ export default {
   data() {
     return {
       hasSurvey: false,
+      hasQuestion: false,
       surveyInfo: {},
+      questionInfo: {},
     };
   },
   mounted() {
     this.getSurvey();
+    this.getQuestion();
   },
   methods: {
     timeFormat(time) {
@@ -45,34 +88,44 @@ export default {
     // 用户点击了删除问卷按钮
     handleDelete() {
       let that = this;
-      uni.showLoading({
-        title: "删除中",
-      });
-      wx.cloud.callFunction({
-        name: "deletPost",
-        data: {
-          colPath: "healthSurvey",
-          id: this.surveyInfo._id,
-        },
+      wx.showModal({
+        title: "提示",
+        content: "您确定要删除健康调查问卷吗？",
         success(res) {
-          uni.showToast({
-            title: "删除成功",
-            icon: "success",
-          });
-          that.getSurvey();
-        },
-        fail(err) {
-          uni.showToast({
-            title: "删除失败，请检查网络",
-            icon: "none",
-          });
+          if (res.confirm) {
+            uni.showLoading({
+              title: "删除中",
+            });
+            wx.cloud.callFunction({
+              name: "deletPost",
+              data: {
+                colPath: "healthSurvey",
+                id: that.surveyInfo._id,
+              },
+              success(res) {
+                uni.showToast({
+                  title: "删除成功",
+                  icon: "success",
+                });
+                that.getSurvey();
+              },
+              fail(err) {
+                uni.showToast({
+                  title: "删除失败，请检查网络",
+                  icon: "none",
+                });
+              },
+            });
+          } else if (res.cancel) {
+            return;
+          }
         },
       });
     },
     // 查询问卷
     getSurvey() {
       let that = this;
-      // 根据openid查询用户提交的健康问卷(回调地狱写法)
+      // 根据openid查询用户提交的信息(回调地狱写法)
       wx.getStorage({
         key: "userOpenId",
         success(res) {
@@ -102,9 +155,41 @@ export default {
         },
       });
     },
+    // 查询用户提问
+    getQuestion() {
+      let that = this;
+      wx.getStorage({
+        key: "userOpenId",
+        success(res) {
+          db.collection("healthPost")
+            .where({
+              _openid: res.data,
+            })
+            .get({
+              success(res) {
+                if (res.data.length === 0) {
+                  // 用户没有提问过
+                  that.hasQuestion = false;
+                } else {
+                  // 用户填写了问卷
+                  that.hasQuestion = true;
+                  that.questionInfo = res.data[0];
+                }
+              },
+              fail(err) {
+                uni.showToast({
+                  title: "查询失败，请检查网络",
+                  icon: "none",
+                });
+                console.log(err);
+              },
+            });
+        },
+      });
+    },
     // 跳转到问卷填写页面
     jumpToSurvey() {
-      wx.navigateTo({
+      wx.redirectTo({
         url: "/pages/healthSurvey/index",
       });
     },
@@ -118,6 +203,7 @@ export default {
   padding: 20rpx;
   height: 100vh;
 }
+// 有问卷时显示的内容
 .survey {
   background-color: #fff;
   border-radius: 30rpx;
@@ -169,6 +255,7 @@ export default {
     }
   }
 }
+// 没有问卷时显示的内容
 .no-survey {
   background-color: #fff;
   border-radius: 30rpx;
@@ -184,6 +271,71 @@ export default {
     justify-content: center;
     width: 60%;
     height: 60%;
+  }
+}
+// 名医解答样式
+.health-question {
+  background-color: #fff;
+  border-radius: 30rpx;
+  padding: 20rpx;
+  margin: 20rpx 0;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  .question-header {
+    color: #000;
+    font-weight: bold;
+    font-size: 30rpx;
+    display: flex;
+    justify-content: center;
+  }
+
+  .has-question {
+    .question-title {
+      font-weight: bold;
+      font-size: 32rpx;
+      color: #000;
+      padding: 10rpx 0;
+    }
+
+    .poster-info {
+      font-size: 30rpx;
+      padding: 10rpx 0;
+      border-bottom: 3rpx solid #ccc;
+    }
+
+    .poster-desc {
+      .desc-title {
+        padding: 10rpx 0;
+        font-size: 30rpx;
+      }
+
+      .desc-detail {
+        font-size: 30rpx;
+        color: #000;
+        padding-bottom: 20rpx 0;
+      }
+    }
+
+    .poster-img {
+      display: flex;
+      flex-wrap: wrap;
+      img {
+        width: 33.33%;
+        border: 4rpx solid #fff;
+      }
+    }
+  }
+
+  .no-question {
+    .text {
+      text-align: center;
+      font-size: 30rpx;
+      padding: 30rpx 0;
+    }
+    button {
+      width: 60%;
+      margin: 0 auto;
+      font-size: 30rpx;
+    }
   }
 }
 </style>

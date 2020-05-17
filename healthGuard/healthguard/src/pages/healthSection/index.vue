@@ -33,7 +33,7 @@
         <view class="box-item" 
               v-for="item in quickCheckItem" 
               :key="item.id"
-              @click="handleItemClick(item.id)">
+              @click="handleItemClick(item.title)">
           <view class="item-text">
             {{item.title}}
           </view>
@@ -117,9 +117,10 @@ export default {
         url: "/pages/writeHealthPost/index",
       });
     },
-    handleItemClick(id){
-      console.log(id);
-      
+    handleItemClick(title){
+       wx.navigateTo({
+        url: `/pages/healthSectionDetail/index?id=${title}`,
+      });
     }
   },
 };

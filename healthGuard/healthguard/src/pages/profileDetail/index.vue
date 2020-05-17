@@ -30,7 +30,8 @@ export default {
   },
   data() {
     return {
-      profileId: "about"
+      // 这里写死了，要改成空值
+      profileId: "health"
     };
   }
 };
