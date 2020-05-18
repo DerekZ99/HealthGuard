@@ -199,7 +199,7 @@ export default {
         loop(0);
       } else {
         // 用户没有上传头像，直接调用上传数据的函数
-        this.upLoadData([], form);
+        this.uploadData([], form);
       }
     },
     // 提交数据
@@ -212,7 +212,15 @@ export default {
           phone: form.phone,
           title: form.title,
           img: imgPath,
-          pTime:new Date().getTime()
+          pTime:new Date().getTime(),
+          // 添加以下字段是为了偷懒
+          comment:"",
+          docGood:"",
+          docHos:"",
+          docJob:"",
+          docImg:"",
+          docName:"",
+          replyed:false
         },
         success(res) {
           uni.showToast({

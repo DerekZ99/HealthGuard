@@ -1,13 +1,13 @@
 {
-  "pages": [
-    
-    {
-      "path": "pages/profileDetail/index"
-    },
-    {
+  "pages": [{
       "path": "pages/index/index"
     },
-    
+    {
+      "path": "pages/healthSection/index",
+      "style": {
+        "navigationBarTitleText": "名医解答"
+      }
+    },
     {
       "path": "pages/healthCheck/index",
       "style": {
@@ -17,12 +17,8 @@
     {
       "path": "pages/writeHealthPost/index"
     },
-    {
-      "path": "pages/healthSection/index",
-      "style": {
-        "navigationBarTitleText": "名医解答"
-      }
-    },
+
+
     {
       "path": "pages/healthSectionDetail/index"
     },
@@ -31,6 +27,9 @@
       "style": {
         "navigationBarTitleText": "个人内容"
       }
+    },
+    {
+      "path": "pages/profileDetail/index"
     },
     {
       "path": "pages/addMore/index",
@@ -51,7 +50,7 @@
         "navigationBarTitleText": "养生之道"
       }
     },
-    
+
     {
       "path": "pages/articleDetail/index"
     },
@@ -79,8 +78,7 @@
     "backgroundColor": "#fff",
     "position": "bottom",
     "borderStyle": "black",
-    "list": [
-      {
+    "list": [{
         "pagePath": "pages/index/index",
         "text": "首页",
         "iconPath": "./static/tabicon/shouye.png",

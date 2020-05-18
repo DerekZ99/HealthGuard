@@ -17,30 +17,44 @@
         />
       </view>
       <view class="search-right">
-        <input type="text" placeholder="请输入您想要咨询的内容" />
+        <input
+          type="text"
+          v-model="searchKeyWorld"
+          placeholder="请输入您想要咨询的内容"
+        />
       </view>
+      <view class="searchBtn" @click="handleSearch(searchKeyWorld)">搜索</view>
     </view>
     <!-- ================搜索栏 结束================ -->
 
     <!-- ================中间内容部分 结束================ -->
-    <scroll-view scroll-y class="post-content"> </scroll-view>
 
-    <view class="quick-check">
+    <!-- 搜索栏的查询内容 开始 -->
+    <view class="post-content" v-if="searchResult.length !== 0">
+      <view v-for="item in searchResult" class="content-detail" :key="item._id">
+        <health-post-detail :questionInfos="item"></health-post-detail>
+      </view>
+    </view>
+    <!-- 搜索栏的查询内容 结束 -->
+    
+    <!-- 如果搜索的内容存在，隐藏热门症状显示搜索内容 -->
+
+    <!-- 热门症状查询 开始 -->
+    <view v-else class="quick-check">
       <view class="check-header">
         热门症状查询
       </view>
       <view class="check-box">
-        <view class="box-item" 
-              v-for="item in quickCheckItem" 
-              :key="item.id"
-              @click="handleItemClick(item.title)">
+        <view
+          class="box-item"
+          v-for="item in quickCheckItem"
+          :key="item.id"
+          @click="handleItemClick(item.title)"
+        >
           <view class="item-text">
-            {{item.title}}
+            {{ item.title }}
           </view>
-          <img v-if="item.img"
-               class="itemBg"
-               :src="item.img"
-          />
+          <img v-if="item.img" class="itemBg" :src="item.img" />
           <view class="item-icon">
             <img
               src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/globalIcon/go-to-link (1).png"
@@ -49,6 +63,7 @@
         </view>
       </view>
     </view>
+    <!-- 热门症状查询 结束 -->
 
     <!-- ================中间内容部分 结束================ -->
 
@@ -61,7 +76,13 @@
 </template>
 
 <script>
+import HealthPostDetail from "components/healthPostDetail";
+
+const db = wx.cloud.database();
 export default {
+  components: {
+    HealthPostDetail,
+  },
   data() {
     return {
       quickCheckItem: [
@@ -109,7 +130,17 @@ export default {
           id: "10",
         },
       ],
+      searchKeyWorld: "",
+      searchResult: [],
     };
+  },
+  watch: {
+    searchKeyWorld() {
+      // 当搜索栏内容为空时，清空搜索内容
+      if (this.searchKeyWorld === "") {
+        this.searchResult = [];
+      }
+    },
   },
   methods: {
     handleWritePost() {
@@ -117,11 +148,37 @@ export default {
         url: "/pages/writeHealthPost/index",
       });
     },
-    handleItemClick(title){
-       wx.navigateTo({
+    handleItemClick(title) {
+      wx.navigateTo({
         url: `/pages/healthSectionDetail/index?id=${title}`,
       });
-    }
+    },
+    // 根据用户输入的内容查询健康问题
+    handleSearch(value) {
+      let that = this;
+      db.collection("healthPost")
+        .where({
+          // 不允许多条件查询
+          comment: new RegExp(`${value}`),
+        })
+        .get({
+          success(res) {
+            if (res.data.length !== 0) {
+              // 找到了这条post
+              that.searchResult = res.data;
+            } else {
+              // 没有搜索到
+              uni.showToast({
+                title: "没有查询到相关的解答",
+                icon: "none",
+              });
+            }
+          },
+          fail(err) {
+            console.log(err);
+          },
+        });
+    },
   },
 };
 </script>
@@ -137,13 +194,9 @@ export default {
     left: 0;
   }
   .search {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    top: 20rpx;
-    z-index: 2;
     display: flex;
-    width: 90%;
+    width: 100%;
+    margin: 20rpx auto 0;
     align-items: center;
     height: 100rpx;
     background-color: #fff;
@@ -169,10 +222,22 @@ export default {
         width: 100%;
       }
     }
+    .searchBtn {
+      padding: 20rpx;
+      font-size: 30rpx;
+      color: #47bcf9;
+    }
   }
 
   .post-content {
-    height: calc(100vh - 100rpx);
+    margin-top: 30rpx;
+    .content-detail {
+      background-color: #fff;
+      border-radius: 30rpx;
+      padding: 20rpx;
+      margin: 20rpx 0;
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    }
   }
 
   // 热门症状查询
@@ -235,32 +300,32 @@ export default {
       .box-item:nth-child(1) {
         width: 66.66%;
       }
-       .box-item:nth-child(2) {
-        background-color: #E2F4D8;
+      .box-item:nth-child(2) {
+        background-color: #e2f4d8;
       }
       .box-item:nth-child(3) {
-        background-color: #D8F1F4;
+        background-color: #d8f1f4;
       }
       .box-item:nth-child(4) {
-        background-color: #F4EBD8;
+        background-color: #f4ebd8;
       }
       .box-item:nth-child(5) {
-        background-color: #D8F4E7;
+        background-color: #d8f4e7;
       }
       .box-item:nth-child(6) {
-        background-color: #F2E9F6;
+        background-color: #f2e9f6;
       }
       .box-item:nth-child(7) {
         width: 66.66%;
       }
       .box-item:nth-child(8) {
-        background-color: #E2F4D8;
+        background-color: #e2f4d8;
       }
       .box-item:nth-child(9) {
-        background-color: #F9E3E8;
+        background-color: #f9e3e8;
       }
       .box-item:nth-child(10) {
-        background-color: #D8F1F4;
+        background-color: #d8f1f4;
       }
     }
   }

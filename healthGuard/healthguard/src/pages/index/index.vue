@@ -1,20 +1,19 @@
 <template>
   <view class="content">
+    <!-- 背景图 -->
+    <img
+      class="bgImg"
+      src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/appbg/indexbg.jpg"
+      alt=""
+    />
+    <!-- 轮播部分 开始 -->
+    <swiper class="swiper" autoplay indicator-dots circular>
+      <swiper-item v-for="item in banner" :key="item._id">
+        <img mode="aspectFill" :src="item.img" alt="" />
+      </swiper-item>
+    </swiper>
+    <!-- 轮播部分 结束 -->
     <swiper-action @swiperAction="handleSwip">
-      <!-- 背景图 -->
-      <img
-        class="bgImg"
-        src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/appbg/indexbg.jpg"
-        alt=""
-      />
-      <!-- 轮播部分 开始 -->
-      <swiper class="swiper" autoplay indicator-dots circular>
-        <swiper-item v-for="item in banner" :key="item._id">
-          <img mode="aspectFill" :src="item.img" alt="" />
-        </swiper-item>
-      </swiper>
-      <!-- 轮播部分 结束 -->
-
       <!-- 信息部分 开始 -->
       <view class="section-box">
         <navigator url="/pages/service/index?id=short" class="section-item">
@@ -70,16 +69,34 @@
         </text>
       </view>
       <!-- 二维码部分 结束 -->
+
+      <!-- 联系社工部分 开始 -->
+      <view class="contact" @click="showContact">
+        <view class="contact-icon">
+          <img
+            mode="widthFix"
+            src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/globalIcon/phonecall.png"
+            alt=""
+          />
+        </view>
+        <view class="contact-text">
+          联系居委、社工
+        </view>
+      </view>
+      <contact-info @closeWindow="showContact" v-if="isShowContact"></contact-info>
+      <!-- 联系社工部分 结束 -->
     </swiper-action>
   </view>
 </template>
 
 <script>
 import SwiperAction from "components/swiperAction";
+import ContactInfo from "./childCpn/contactInfo/index";
 const db = wx.cloud.database();
 export default {
   components: {
     SwiperAction,
+    ContactInfo,
   },
   data() {
     return {
@@ -91,6 +108,7 @@ export default {
         { text: "“满天星”​为儿童捐书活动", id: 3 },
       ],
       timer: "",
+      isShowContact: false,
     };
   },
   onLoad() {
@@ -122,13 +140,17 @@ export default {
       if (e.direction === "left") {
         wx.switchTab({
           url: "/pages/addMore/index",
-        });        
+        });
       } else {
         uni.showToast({
           title: "左边没页面啦！",
           icon: "none",
         });
       }
+    },
+    // 显示社工电话
+    showContact() {
+      this.isShowContact = !this.isShowContact;
     },
   },
   onHide() {
@@ -236,6 +258,36 @@ export default {
     color: #000;
     font-size: 30rpx;
     margin-top: 28rpx;
+  }
+}
+
+// 联系社工
+.contact {
+  position: absolute;
+  bottom: 20rpx;
+  right: 10rpx;
+
+  .contact-icon {
+    margin: 0 auto 20rpx;
+    border-radius: 50%;
+    width: 100rpx;
+    height: 100rpx;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+    background-color: #fe902f;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    img {
+      width: 70%;
+    }
+  }
+
+  .contact-text {
+    padding: 5rpx 15rpx;
+    border-radius: 20rpx;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+    color: #000;
   }
 }
 </style>

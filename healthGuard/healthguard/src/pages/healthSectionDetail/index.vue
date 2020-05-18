@@ -51,7 +51,16 @@ export default {
     };
   },
   onLoad(options) {
-    this.getInfo(options.id);
+    // 这里写死是为了偷懒  this.getInfo(options.id) 才是原文
+    if (options.id === "头晕") {
+      this.getInfo(options.id);
+    } else if (options.id === "打呼噜") {
+      this.getInfo(options.id);
+    } else if (options.id === "发热") {
+      this.getInfo(options.id);
+    } else {
+      this.getInfo("头晕");
+    }
   },
   methods: {
     getInfo(title) {
@@ -106,12 +115,11 @@ export default {
     .head-desc {
       color: #000;
       font-size: 34rpx;
-      text-indent:2em;
+      text-indent: 2em;
     }
   }
 
   .detail-body {
-    
     .body-title {
       font-size: 34rpx;
       color: #000;
@@ -122,11 +130,11 @@ export default {
     }
 
     .body-content {
-      background-color: #F3F8F1;
-      border: 3rpx solid #E5E5E5;
+      background-color: #f3f8f1;
+      border: 3rpx solid #e5e5e5;
       padding: 20rpx;
       .content-text {
-        text-indent:2em;
+        text-indent: 2em;
         font-size: 32rpx;
         color: #000;
       }

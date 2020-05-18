@@ -22,39 +22,13 @@
     </view>
     <!-- =============没有问卷时显示 结束============= -->
 
-    <view class="health-question">
+    <view v-for="item in questionInfo" :key="item._id" class="health-question">
       <view class="question-header">我的咨询</view>
-      <view v-if="hasQuestion" class="has-question">
-        <view class="question-title">
-          {{ questionInfo.title }}
-        </view>
-        <view class="poster-info">
-          发布于{{ timeFormat(questionInfo.pTime) }} | 年龄：{{
-            questionInfo.age
-          }}岁 | 性别：{{ questionInfo.sex }}
-        </view>
-        <view class="poster-desc">
-          <view class="desc-title">健康咨询描述：</view>
-          <view class="desc-detail">
-            {{ questionInfo.detail }}
-          </view>
-        </view>
-        <view class="reply">
-          <view class="replay-title">
-            医生回复区
-          </view>
-          
-        </view>
-        <view class="poster-img">
-          <img
-            v-for="(item, index) in questionInfo.img"
-            :key="index"
-            :src="item"
-            mode="widthFix"
-          />
-        </view>
-      </view>
-      <view v-else class="no-question">
+      <!-- 解答组件 -->
+      <health-post-detail :questionInfos="item" v-if="hasQuestion" ></health-post-detail>
+  
+      <!-- 解答组件 -->
+      <view v-if="!hasQuestion" class="no-question">
         <view class="text">
           您还没有在名医解答版块咨询问题。若您有健康方面的问题想咨询医生可点击下方按钮进入名医解答版块寻求帮助
         </view>
@@ -66,15 +40,19 @@
 
 <script>
 import moment from "moment";
+import HealthPostDetail from "components/healthPostDetail";
 
 const db = wx.cloud.database();
 export default {
+  components: {
+    HealthPostDetail,
+  },
   data() {
     return {
       hasSurvey: false,
       hasQuestion: false,
       surveyInfo: {},
-      questionInfo: {},
+      questionInfo: [],
     };
   },
   mounted() {
@@ -173,7 +151,7 @@ export default {
                 } else {
                   // 用户填写了问卷
                   that.hasQuestion = true;
-                  that.questionInfo = res.data[0];
+                  that.questionInfo = res.data;
                 }
               },
               fail(err) {
@@ -286,43 +264,6 @@ export default {
     font-size: 30rpx;
     display: flex;
     justify-content: center;
-  }
-
-  .has-question {
-    .question-title {
-      font-weight: bold;
-      font-size: 32rpx;
-      color: #000;
-      padding: 10rpx 0;
-    }
-
-    .poster-info {
-      font-size: 30rpx;
-      padding: 10rpx 0;
-      border-bottom: 3rpx solid #ccc;
-    }
-
-    .poster-desc {
-      .desc-title {
-        padding: 10rpx 0;
-        font-size: 30rpx;
-      }
-
-      .desc-detail {
-        font-size: 30rpx;
-        color: #000;
-        padding-bottom: 20rpx 0;
-      }
-    }
-
-    .poster-img {
-      display: flex;
-      flex-wrap: wrap;
-      img {
-        width: 33.33%;
-        border: 4rpx solid #fff;
-      }
-    }
   }
 
   .no-question {
