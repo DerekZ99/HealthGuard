@@ -1,6 +1,6 @@
 <template>
-  <view class="profile">
-    <swiper-action @swiperAction="handleSwip">
+  <swiper-action @swiperAction="handleSwip">
+    <view class="profile">
       <!-- 登录模块 开始 -->
       <user-info :isLogin="isUserLogin" @login="userLogin">
         <open-data mode="widthFix" type="userAvatarUrl"></open-data>
@@ -16,19 +16,17 @@
           :key="item.id"
         >
           <view class="item-icon">
-            <img mode="widthFix" :src="item.icon" alt="" />
+            <img mode="widthFix" :src="item.icon" alt />
           </view>
           <view class="item-content">
-            <view class="content-text">
-              {{ item.title }}
-            </view>
+            <view class="content-text">{{ item.title }}</view>
             <view class="content-arrow">1</view>
           </view>
         </view>
       </view>
       <!-- 按钮选项模块 结束 -->
-    </swiper-action>
-  </view>
+    </view>
+  </swiper-action>
 </template>
 
 <script>
@@ -38,7 +36,7 @@ import SwiperAction from "components/swiperAction";
 export default {
   components: {
     UserInfo,
-    SwiperAction,
+    SwiperAction
   },
   data() {
     return {
@@ -48,27 +46,27 @@ export default {
           title: "我的求职信息",
           icon:
             "cloud://tryout-edov9.7472-tryout-edov9-1302058975/globalIcon/qiuzhi_2.png",
-          id: "job",
+          id: "job"
         },
         {
           title: "我的招聘信息",
           icon:
             "cloud://tryout-edov9.7472-tryout-edov9-1302058975/globalIcon/zhaopin.png",
-          id: "hire",
+          id: "hire"
         },
         {
           title: "我的健康检查",
           icon:
             "cloud://tryout-edov9.7472-tryout-edov9-1302058975/globalIcon/jiankang-copy.png",
-          id: "health",
+          id: "health"
         },
         {
           title: "关于",
           icon:
             "cloud://tryout-edov9.7472-tryout-edov9-1302058975/globalIcon/guanyu.png",
-          id: "about",
-        },
-      ],
+          id: "about"
+        }
+      ]
     };
   },
   onShow() {
@@ -88,28 +86,26 @@ export default {
         // 用户已登录，执行跳转操作
         wx.navigateTo({
           url: `/pages/profileDetail/index?id=${id}`,
-          success(res) {},
         });
       } else {
         // 用户未登录，阻止跳转
         uni.showToast({
           title: "您还没有登录",
-          icon: "none",
+          icon: "none"
         });
-        return;
       }
     },
     // 手指滑动跳转tab
-    handleSwip(e){
-      if(e.direction==="right"){
-         wx.switchTab({
-          url: "/pages/addMore/index",
+    handleSwip(e) {
+      if (e.direction === "right") {
+        wx.switchTab({
+          url: "/pages/addMore/index"
         });
-      } else{
+      } else {
         uni.showToast({
-          title:"右边没有页面啦",
-          icon:'none'
-        })
+          title: "右边没有页面啦",
+          icon: "none"
+        });
       }
     },
     // 同步登录状态
@@ -123,10 +119,10 @@ export default {
           } else {
             that.isUserLogin = res.data;
           }
-        },
+        }
       });
-    },
-  },
+    }
+  }
 };
 </script>
 

@@ -72,12 +72,10 @@ export default {
             if (res.tapIndex === 0) {
               wx.navigateTo({
                 url: `/pages/writeHirePost/index?id=${info}`,
-                success(res) {},
               });
             } else {
               wx.navigateTo({
                 url: `/pages/writeJobPost/index?id=${info}`,
-                success(res) {},
               });
             }
           },

@@ -7,33 +7,33 @@
     </view>
 
     <view class="contact-detail">
-      <view class="detail-item">阳光天使社工机构</view>
-      <view class="detail-item">地址​：新杨区青云路85号</view>
-      <view class="detail-item">电话​：8458 0156</view>
-    </view>
-
-    <view class="contact-detail">
-      <view class="detail-item">新杨区居委会</view>
+      <view class="detail-item">​新杨区居委会</view>
       <view class="detail-item">地址​：新杨区林荫路88号</view>
-      <view class="detail-item">电话​：8587 0908</view>
-    </view>
-
-    <view class="contact-detail">
-      <view class="detail-item">阳光天使社工机构</view>
-      <view class="detail-item">地址​：新杨区青云路85号</view>
       <view class="detail-item">电话​：8458 0156</view>
     </view>
 
     <view class="contact-detail">
-      <view class="detail-item">阳光天使社工机构</view>
-      <view class="detail-item">地址​：新杨区青云路85号</view>
-      <view class="detail-item">电话​：8458 0156</view>
+      <view class="detail-item">乐养老年护理机构</view>
+      <view class="detail-item">地址​：黄龙区玉山路75号</view>
+      <view class="detail-item">电话​：8756 7907</view>
     </view>
 
     <view class="contact-detail">
-      <view class="detail-item">阳光天使社工机构</view>
-      <view class="detail-item">地址​：新杨区青云路85号</view>
-      <view class="detail-item">电话​：8458 0156</view>
+      <view class="detail-item">黄龙区党群服务中心</view>
+      <view class="detail-item">地址​：黄龙区玉林路70号</view>
+      <view class="detail-item">电话​：8794 5568​</view>
+    </view>
+
+    <view class="contact-detail">
+      <view class="detail-item">临河区卫生站</view>
+      <view class="detail-item">地址​：临河区羽南路65号</view>
+      <view class="detail-item">电话​：8898 7765​</view>
+    </view>
+
+    <view class="contact-detail">
+      <view class="detail-item">奉乐社工机构</view>
+      <view class="detail-item">地址​：临河区绍清路77号</view>
+      <view class="detail-item">电话​：8905 7508</view>
     </view>
 
     <!-- 关闭按钮 开始 -->

@@ -25,13 +25,26 @@
     <view v-for="item in questionInfo" :key="item._id" class="health-question">
       <view class="question-header">我的咨询</view>
       <!-- 解答组件 -->
-      <health-post-detail :questionInfos="item" v-if="hasQuestion" ></health-post-detail>
-  
+      <health-post-detail :questionInfos="item" v-if="hasQuestion">
+        <view class="option-wrap" slot="option">
+          <button
+            class="question-option edit"
+            v-if="!item.replyed"
+            @click="handleEdit(item)"
+          >
+            修改
+          </button>
+          <button class="question-option delete" @click="handleDelete(item)">
+            删除
+          </button>
+        </view>
+      </health-post-detail>
+
       <!-- 解答组件 -->
       <view v-if="!hasQuestion" class="no-question">
-        <view class="text">
-          您还没有在名医解答版块咨询问题。若您有健康方面的问题想咨询医生可点击下方按钮进入名医解答版块寻求帮助
-        </view>
+        <view class="text"
+          >您还没有在名医解答版块咨询问题。若您有健康方面的问题想咨询医生可点击下方按钮进入名医解答版块寻求帮助</view
+        >
         <button>前往名医解答版块</button>
       </view>
     </view>
@@ -171,6 +184,55 @@ export default {
         url: "/pages/healthSurvey/index",
       });
     },
+    //删除帖子
+    handleDelete(item) {
+      let that = this;
+      wx.showModal({
+        title: "提示",
+        content: "您确定要删除这个提问吗？",
+        success(res) {
+          if (res.confirm) {
+            uni.showLoading({
+              title: "删除中",
+            });
+            wx.cloud.callFunction({
+              name: "deletPost",
+              data: {
+                colPath: "healthPost",
+                id: item._id,
+              },
+              success(res) {
+                uni.showToast({
+                  title: "删除成功",
+                  icon: "success",
+                });
+                that.getQuestion();
+              },
+              fail(err) {
+                uni.showToast({
+                  title: "删除失败，请检查网络",
+                  icon: "none",
+                });
+              },
+            });
+          } else if (res.cancel) {
+            return;
+          }
+        },
+      });
+    },
+    //编辑帖子
+    async handleEdit(item) {
+      // 利用微信缓存传值
+      const do1 = await wx.setStorage({
+        key: "healthPostDetail",
+        data: item,
+      });
+
+      const do2 = await wx.navigateTo({
+        url: "/pages/writeHealthPost/index",
+      });
+    },
   },
 };
 </script>
@@ -264,6 +326,18 @@ export default {
     font-size: 30rpx;
     display: flex;
     justify-content: center;
+  }
+  .option-wrap {
+    .question-option {
+      margin: 20rpx 0;
+      color: #eee;
+    }
+    .edit {
+      background-color: #00b26a;
+    }
+    .delete {
+      background-color: red;
+    }
   }
 
   .no-question {

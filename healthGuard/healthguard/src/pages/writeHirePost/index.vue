@@ -94,7 +94,7 @@
           name="phone"
           placeholder="请输入电话号码"
           v-model="textValue3"
-          @blur="checkPhone(textValue3)"
+          @blur="checkContent(textValue3,'phone')"
           :class="{warning:!isPhoneOk}"
         />
         <!-- 警告信息 -->
@@ -136,13 +136,12 @@ const db = wx.cloud.database();
 export default {
   data() {
     return {
-      // 临时改的，完事之后要改成空的字符串（both）
       postType: "",
       formTitle: "",
       array: ["面议"],
       index: 0,
       timeList: [[], []],
-      timesIndex: [0, 0],
+      timesIndex: [9, 18],
       // 正则
       isTextOk: true,
       isWorkPlaceOk: true,
@@ -156,9 +155,7 @@ export default {
       options.id === "long" ? "发布长期招聘信息" : "发布短期招聘信息";
     // 遍历薪资
     for (let i = 1; i <= 100; i++) {
-      i * 100;
-      let j = i * 100;
-      this.array.push(j);
+      this.array.push(i * 100);
     }
     // 遍历工作时间
     for (let i = 0; i <= 24; i++) {
@@ -194,7 +191,7 @@ export default {
       }
       // 表单内容合法，可以提交
       uni.showLoading({
-        title: "加载中"
+        title: "上传中"
       });
       const formContent = e.detail.value;
       // 判断是长期招聘还是短期
@@ -202,7 +199,7 @@ export default {
         db.collection(collection).add({
           data: {
             post: formContent,
-            pTime:new Date().getTime()
+            pTime: new Date().getTime()
           },
           success(res) {
             uni.hideLoading();
@@ -239,18 +236,18 @@ export default {
     // 表单验证部分
     checkContent(msg, name) {
       let reg = /^[\u4E00-\u9FA5A-Za-z0-9]+$/;
+      let regPhone = /^1((((3[4-9])|(5[0-27-9])|(8[2-478])|(78)|(47))|((3[0-2])|([58][56])|(76)|(45))|(([35]3)|(8[019])|(77))|((170)))\d{8})|(1349[0-9]{7})$/;
+
       if (name === "jobTitle") {
         this.isTextOk = reg.test(msg);
       } else if (name === "workplace") {
         this.isWorkPlaceOk = reg.test(msg);
       } else if (name === "posterName") {
         this.isNameOk = reg.test(msg);
+      } else if (name === "phone"){
+        this.isPhoneOk = regPhone.test(msg);
       }
     },
-    checkPhone(msg) {
-      let reg = /^1((((3[4-9])|(5[0-27-9])|(8[2-478])|(78)|(47))|((3[0-2])|([58][56])|(76)|(45))|(([35]3)|(8[019])|(77))|((170)))\d{8})|(1349[0-9]{7})$/;
-      this.isPhoneOk = reg.test(msg);
-    }
   }
 };
 </script>

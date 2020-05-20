@@ -1,35 +1,24 @@
 <template>
   <view class="has-question">
     <!-- 病人信息区域 开始 -->
-    <view class="question-title">
-      {{ questionInfos.title }}
-    </view>
+    <view class="question-title">{{ questionInfos.title }}</view>
     <view class="poster-info">
       发布于{{ timeFormat(questionInfos.pTime) }} | 年龄：{{
-        questionInfos.age
+      questionInfos.age
       }}岁 | 性别：{{ questionInfos.sex }}
     </view>
     <view class="poster-desc">
       <view class="desc-title">健康咨询描述：</view>
-      <view class="desc-detail">
-        {{ questionInfos.detail }}
-      </view>
+      <view class="desc-detail">{{ questionInfos.detail }}</view>
     </view>
     <view class="poster-img" v-if="questionInfos.img.length !== 0">
-      <img
-        v-for="(items, index) in questionInfos.img"
-        :key="index"
-        :src="items"
-        mode="widthFix"
-      />
+      <img v-for="(items, index) in questionInfos.img" :key="index" :src="items" mode="widthFix" />
     </view>
     <!-- 病人信息区域 结束 -->
 
     <!-- 医生回复区域 开始 -->
     <view class="reply">
-      <view class="replay-title">
-        医生回复区:
-      </view>
+      <view class="replay-title">医生回复区:</view>
 
       <view v-if="questionInfos.replyed" class="has-replay">
         <!-- 医生信息部分 开始 -->
@@ -39,28 +28,24 @@
           </view>
           <view class="info-right">
             <view class="right-row">
-              <view class="row-name">
-                {{ questionInfos.docName }}
-              </view>
-              <view class="row-docInfo">
-                {{ questionInfos.docHos }} {{ questionInfos.docJob }}
-              </view>
+              <view class="row-name">{{ questionInfos.docName }}</view>
+              <view class="row-docInfo">{{ questionInfos.docHos }} {{ questionInfos.docJob }}</view>
             </view>
-            <view class="right-row"> 擅长：{{ questionInfos.docGood }} </view>
+            <view class="right-row">擅长：{{ questionInfos.docGood }}</view>
           </view>
         </view>
         <!-- 医生信息部分 结束 -->
 
         <!-- 医生评论详情 开始 -->
-        <view class="doc-comment">
-          {{ questionInfos.comment }}
-        </view>
+        <view class="doc-comment">{{ questionInfos.comment }}</view>
         <!-- 医生评论详情 结束 -->
       </view>
 
-      <view v-else class="no-replay">
-        暂时还没有收到医生的回复，请耐心等待
-      </view>
+      <view v-else class="no-replay">暂时还没有收到医生的回复，请耐心等待</view>
+      
+      <!-- 用户操作 开始 -->
+      <slot name="option"></slot>
+      <!-- 用户操作 结束 -->
     </view>
     <!-- 医生回复区域 结束 -->
   </view>
@@ -73,14 +58,14 @@ export default {
   props: {
     questionInfos: {
       type: Object,
-      default: {},
-    },
+      default: {}
+    }
   },
   methods: {
     timeFormat(time) {
       return moment(time).format("YYYY-MM-DD");
-    },
-  },
+    }
+  }
 };
 </script>
 

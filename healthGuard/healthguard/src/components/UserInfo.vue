@@ -27,9 +27,6 @@ export default {
       default: false
     }
   },
-  data() {
-    return {};
-  },
   mounted() {
     let that = this;
     wx.getStorage({
@@ -50,7 +47,9 @@ export default {
         return;
       }
       // 用户点击了确认授权
-      uni.showLoading();
+      uni.showLoading({
+        title:"正在登陆中"
+      });
       let that = this;
       wx.getUserInfo({
         success(res) {

@@ -41,7 +41,7 @@
           <img
             mode="widthFix"
             src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/globalIcon/healthUpload.png"
-            alt=""
+            alt
           />
         </view>
         <view class="img-right">
@@ -61,7 +61,7 @@
           <view
             v-if="tempFilePaths.length !== 0"
             class="addImg"
-            @click="handleAddImg"
+            @click="handleImg"
           >
             <img mode="widthFix" src="@/static/tabicon/zengjia.png" />
           </view>
@@ -129,6 +129,7 @@
 
 <script>
 const db = wx.cloud.database();
+import uploadImg from "utils/uploadImg";
 export default {
   data() {
     return {
@@ -138,7 +139,48 @@ export default {
       isAgeOk: true,
       isPhoneOk: true,
       tempFilePaths: [],
+      // 当是更新操作时，这里为true
+      isUpdateForm: false,
+      postId: "",
+      valTitle: "",
+      valDetail: "",
+      valAge: null,
+      valPhone: null,
     };
+  },
+  async onLoad() {
+    // 判断用户是填写新的问题还是进行修改操作
+    const do1 = await wx
+      .getStorage({
+        key: "healthPostDetail",
+      })
+      .catch((err) => {
+        return err;
+      });
+
+    if (do1.errMsg === "getStorage:ok") {
+      // 能拿到缓存中的数据，是修改操作
+      this.isUpdateForm = true;
+      const oldForm = do1.data;
+      this.postId = oldForm._id;
+      this.valTitle = oldForm.title;
+      this.valDetail = oldForm.detail;
+      this.gender = oldForm.sex === "男" ? "male" : "female";
+      this.valAge = oldForm.age;
+      this.valPhone = oldForm.phone;
+      this.tempFilePaths = oldForm.img;
+    } else {
+      // 拿不到数据，代表是添加操作
+      console.log("没拿到");
+    }
+  },
+  onUnload() {
+    // 离开页面时清除缓存
+    wx.removeStorage({
+      key: "healthPostDetail",
+    });
+    this.isUpdateForm = false;
+    this.postId = "";
   },
   methods: {
     // 用户点击了提交按钮
@@ -163,40 +205,28 @@ export default {
         });
         return;
       }
+
       // 表单验证通过来到这里
       const form = e.detail.value;
+
+      // 分叉口，当表单为编辑操作时往这里走，不执行下面的函数
+      if (this.isUpdateForm) {
+        this.updateImg(form);
+        return;
+      }
+
       // 判断用户是否有上传头像
       if (this.tempFilePaths.length !== 0) {
         // 用户有上传头像，先把头像上传到云存储，然后拿到他的fileID并上传数据库
-        let newImgPath = [];
-        let that = this;
         uni.showLoading({
           title: "上传中",
         });
-        // -=============递归执行头像上传操作============
-        function loop(index) {
-          if (index < that.tempFilePaths.length) {
-            wx.cloud.uploadFile({
-              cloudPath: `healthPosterImg/${new Date().getTime()}-${Math.floor(
-                Math.random() * 1000
-              )}`,
-              filePath: that.tempFilePaths[index],
-              success(res) {
-                // 上传头像成功后拿到图片的fileID推进新数组里面
-                newImgPath.push(res.fileID);
-                index++;
-                loop(index);
-              },
-              fail(err) {
-                console.log(err + "上传失败");
-              },
-            });
-          } else {
-            // 递归上传图片完成，执行数据上传操作
-            that.uploadData(newImgPath, form);
-          }
-        }
-        loop(0);
+        // -=============执行头像上传操作============
+        // 这个函数被封装到了utils里面，res返回的是fileId数组
+        uploadImg(this.tempFilePaths).then((res) => {
+          // 上传图片完成，执行数据上传操作
+          this.uploadData(res, form);
+        });
       } else {
         // 用户没有上传头像，直接调用上传数据的函数
         this.uploadData([], form);
@@ -206,21 +236,21 @@ export default {
     uploadData(imgPath, form) {
       db.collection("healthPost").add({
         data: {
-          age: form.age,
+          age: parseInt(form.age),
           detail: form.detail,
           sex: form.sex,
-          phone: form.phone,
+          phone: parseInt(form.phone),
           title: form.title,
           img: imgPath,
-          pTime:new Date().getTime(),
+          pTime: new Date().getTime(),
           // 添加以下字段是为了偷懒
-          comment:"",
-          docGood:"",
-          docHos:"",
-          docJob:"",
-          docImg:"",
-          docName:"",
-          replyed:false
+          comment: "",
+          docGood: "",
+          docHos: "",
+          docJob: "",
+          docImg: "",
+          docName: "",
+          replyed: false,
         },
         success(res) {
           uni.showToast({
@@ -260,9 +290,9 @@ export default {
     },
     // 正则验证
     checkValue(val, name) {
-      let regDetail = /^([\u4E00-\u9FA5A-Za-z0-9、“”，,。.?？]){20,1000}$/;
+      let regDetail = /^([\u4E00-\u9FA5A-Za-z0-9_ 、“”，,。.?？]){20,1000}$/;
 
-      let regTitle = /^([\u4E00-\u9FA5A-Za-z、“”，,。.?？]){2,15}$/;
+      let regTitle = /^([\u4E00-\u9FA5A-Za-z0-9_ 、“”，,。.?？]){2,15}$/;
 
       let regAge = /^([1-9][0-9]{0,1}|110)$/;
 
@@ -280,16 +310,13 @@ export default {
     },
     //选择图片
     handleImg() {
-      let that = this;
-      wx.chooseImage({
-        count: 9,
-        sizeType: ["original", "compressed"],
-        sourceType: ["album", "camera"],
-        success(res) {
-          // tempFilePath可以作为img标签的src属性显示图片
-          that.tempFilePaths = res.tempFilePaths;
-        },
-      });
+      this.chooseImg(9)
+        .then((res) => {
+          this.tempFilePaths = [...this.tempFilePaths, ...res.tempFilePaths];
+        })
+        .catch((err) => {
+          return;
+        });
     },
     // 删除图片
     handleImgOption(index) {
@@ -307,17 +334,58 @@ export default {
         },
       });
     },
-    // 增加图片
-    handleAddImg() {
-      let that = this;
-      wx.chooseImage({
-        count: 9,
-        sizeType: ["original", "compressed"],
-        sourceType: ["album", "camera"],
-        success(res) {
-          that.tempFilePaths.push(...res.tempFilePaths);
-        },
-      });
+    // ------------更新表单的函数-----------
+    // 更新图片
+    updateImg(form) {
+      if (this.tempFilePaths.indexOf("http")) {
+        let newImglist = this.tempFilePaths.filter((item) => {
+          return item.includes("http");
+        });
+        uploadImg(newImglist)
+          .then((res) => {
+            this.tempFilePaths.splice(-res.length, res.length, ...res);
+            this.updateData(form, this.tempFilePaths);
+          })
+          .catch((err) => {});
+      } else {
+        // 图片数组里没有新增的图片，直接更新
+        this.updateData(form, this.tempFilePaths);
+      }
+    },
+    // 更新数据
+    updateData(form, imgList) {
+      db.collection("healthPost")
+        .where({
+          _id: this.postId,
+        })
+        .update({
+          data: {
+            age: parseInt(form.age),
+            detail: form.detail,
+            sex: form.sex,
+            phone: parseInt(form.phone),
+            title: form.title,
+            img: imgList,
+            pTime: new Date().getTime(),
+          },
+          success(res) {
+            uni.showToast({
+              title: "资料修改成功",
+              icon: "success",
+            });
+            setTimeout(() => {
+              wx.switchTab({
+                url: "/pages/profile/index",
+              });
+            }, 1000);
+          },
+          fail(err) {
+            uni.showToast({
+              title: "提交失败，请检查网络",
+              icon: "none",
+            });
+          },
+        });
     },
   },
 };

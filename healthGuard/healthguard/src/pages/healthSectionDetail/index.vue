@@ -4,6 +4,7 @@
       <view v-if="infoDetail.title" class="head-title">
         {{ infoDetail.title }}
       </view>
+      <view>来源：有问必答网</view>
       <view class="head-img">
         <img mode="widthFix" :src="infoDetail.img" alt="" />
       </view>

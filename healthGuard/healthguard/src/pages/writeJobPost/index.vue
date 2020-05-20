@@ -76,6 +76,7 @@ export default {
   data() {
     return {
       formTitle: "",
+      // 图片占位符
       imgFilePath:
         "cloud://tryout-edov9.7472-tryout-edov9-1302058975/imgHolder.jpg",
       isNameOk: true,
@@ -136,24 +137,14 @@ export default {
       uni.showLoading({
         title: "加载中"
       });
-      let that = this;
-      wx.chooseImage({
-        count: 1,
-        sizeType: ["original", "compressed"],
-        sourceType: ["album", "camera"],
-        success(res) {
-          // 用户上传了的头像
-          that.isUpLoadImg = true;
-          that.imgFilePath = res.tempFilePaths[0];
-          uni.showToast({
-            title: "已添加头像",
-            icon: "success"
-          });
-        },
-        fail() {
-          uni.hideLoading();
-        }
-      });
+      this.chooseImg(1)
+        .then(res => {
+          this.isUpLoadImg = true;
+          this.imgFilePath = res.tempFilePaths[0];
+        })
+        .catch(err => {
+          console.log(err);
+        });
     },
     // 上传数据到数据库
     upLoadData(img, form) {
@@ -163,7 +154,7 @@ export default {
           data: {
             post: form,
             userImg,
-            pTime:new Date().getTime()
+            pTime: new Date().getTime()
           },
           success(res) {
             uni.showToast({

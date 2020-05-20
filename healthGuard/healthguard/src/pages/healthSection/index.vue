@@ -20,7 +20,7 @@
         <input
           type="text"
           v-model="searchKeyWorld"
-          placeholder="请输入您想要咨询的内容"
+          placeholder="请输入想要咨询的内容,如“发烧”"
         />
       </view>
       <view class="searchBtn" @click="handleSearch(searchKeyWorld)">搜索</view>
