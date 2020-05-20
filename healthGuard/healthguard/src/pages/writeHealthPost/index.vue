@@ -121,7 +121,7 @@
       </view>
 
       <!-- 提交按钮 开始 -->
-      <button type="primary" form-type="submit">提交问题</button>
+      <button type="primary" form-type="submit">{{isUpdateForm?"提交修改":"提交问题"}}</button>
       <!-- 提交按钮 结束 -->
     </form>
   </view>
@@ -130,6 +130,8 @@
 <script>
 const db = wx.cloud.database();
 import uploadImg from "utils/uploadImg";
+import { showModal, getStorage } from "@/api/index";
+
 export default {
   data() {
     return {
@@ -149,16 +151,13 @@ export default {
     };
   },
   async onLoad() {
-    // 判断用户是填写新的问题还是进行修改操作
-    const do1 = await wx
-      .getStorage({
-        key: "healthPostDetail",
-      })
-      .catch((err) => {
-        return err;
-      });
+    const do1 = await getStorage("healthPostDetail").catch((err) => {
+      return;
+    });
 
-    if (do1.errMsg === "getStorage:ok") {
+    if (!do1) {
+      return;
+    } else {
       // 能拿到缓存中的数据，是修改操作
       this.isUpdateForm = true;
       const oldForm = do1.data;
@@ -169,9 +168,6 @@ export default {
       this.valAge = oldForm.age;
       this.valPhone = oldForm.phone;
       this.tempFilePaths = oldForm.img;
-    } else {
-      // 拿不到数据，代表是添加操作
-      console.log("没拿到");
     }
   },
   onUnload() {
@@ -221,7 +217,6 @@ export default {
         uni.showLoading({
           title: "上传中",
         });
-        // -=============执行头像上传操作============
         // 这个函数被封装到了utils里面，res返回的是fileId数组
         uploadImg(this.tempFilePaths).then((res) => {
           // 上传图片完成，执行数据上传操作
@@ -233,8 +228,8 @@ export default {
       }
     },
     // 提交数据
-    uploadData(imgPath, form) {
-      db.collection("healthPost").add({
+    async uploadData(imgPath, form) {
+      const do1 = await db.collection("healthPost").add({
         data: {
           age: parseInt(form.age),
           detail: form.detail,
@@ -252,37 +247,36 @@ export default {
           docName: "",
           replyed: false,
         },
-        success(res) {
-          uni.showToast({
-            title: "提交成功",
-            icon: "success",
-          });
-          setTimeout(() => {
-            wx.showModal({
-              title: "提示",
-              content:
-                "您的询问信息已提交，医生们会尽快回复您。您可以在“我的”个人页面，点击“我的健康检查”查看信息的最新情况。",
-              success(res) {
-                if (res.confirm) {
-                  wx.switchTab({
-                    url: "/pages/profile/index",
-                  });
-                } else if (res.cancel) {
-                  wx.navigateBack({
-                    delta: 1,
-                  });
-                }
-              },
-            });
-          }, 1000);
-        },
-        fail(err) {
-          uni.showToast({
-            title: "提交失败，请检查网络",
-            icon: "none",
-          });
-        },
       });
+      //判断提交结果
+      if (do1.errMsg === "collection.add:ok") {
+        // 提交成功
+        uni.showToast({
+          title: "提交成功",
+          icon: "success",
+        });
+        setTimeout(() => {
+          showModal(
+            "您的询问信息已提交，医生们会尽快回复您。您可以在“我的”个人页面，点击“我的健康检查”查看信息的最新情况。"
+          )
+            .then((res) => {
+              wx.switchTab({
+                url: "/pages/profile/index",
+              });
+            })
+            .catch(() => {
+              wx.navigateBack({
+                delta: 1,
+              });
+            });
+        }, 1000);
+      } else {
+        // 提交失败
+        uni.showToast({
+          title: "提交失败，请检查网络",
+          icon: "none",
+        });
+      }
     },
     // 修改性别
     handleChangeSex(sex) {
@@ -327,7 +321,24 @@ export default {
         content: "您要删除这张图片吗？",
         success(res) {
           if (res.confirm) {
-            that.tempFilePaths.splice(index, 1);
+            // 删除云存储中的图片
+            if (that.tempFilePaths[index].includes("cloud://tryout")) {
+              wx.cloud
+                .deleteFile({
+                  fileList: [that.tempFilePaths[index]],
+                })
+                .then((res) => {
+                  that.tempFilePaths.splice(index, 1);
+                })
+                .catch(err=>{
+                  uni.showToast({
+                    title:"删除失败，请检查网络",
+                    icon:'none'
+                  })
+                })
+            } else {
+              that.tempFilePaths.splice(index, 1);
+            }
           } else if (res.cancel) {
             return;
           }

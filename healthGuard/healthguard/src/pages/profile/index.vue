@@ -128,9 +128,8 @@ export default {
 
 <style lang="scss" scoped>
 .profile {
+  background-color: #F5F5F5;
   height: 100vh;
-  background-color: #eeeeee;
-
   .options {
     .option-item {
       background-color: #ffffff;

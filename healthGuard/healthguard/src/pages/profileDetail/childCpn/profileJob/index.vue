@@ -1,7 +1,11 @@
 <template>
   <view class="job">
     <!-- ================tab栏 开始================ -->
-    <tab-control ref="tabControl" :titles="tabTitle" @tabClick="tabClicked"></tab-control>
+    <tab-control
+      ref="tabControl"
+      :titles="tabTitle"
+      @tabClick="tabClicked"
+    ></tab-control>
     <!-- ================tab栏 结束================ -->
 
     <!-- ==============求职内容部分 开始============== -->
@@ -25,6 +29,7 @@ import TabControl from "components/TabControl";
 import SwiperAction from "components/swiperAction";
 // 引入求职模板
 import Job from "pages/service/childCpn/job/index";
+import { showModal, getStorage } from "@/api/index";
 
 const db = wx.cloud.database();
 export default {
@@ -50,13 +55,12 @@ export default {
       // 数据容器，把数据传给渲染模板
       longTermInfo: [],
       shortTermInfo: [],
-      colPath: "",
     };
   },
   mounted() {
     // 初次挂载时请求数据库数据
-    this.getLongTermList();
-    this.getShortTermList();
+    this.getList("long");
+    this.getList("short");
   },
   methods: {
     tabClicked(index) {
@@ -66,82 +70,58 @@ export default {
         return;
       }
     },
-    // 根据用户openid获取用户发布的求职信息
-    getLongTermList() {
-      let that = this;
+    // 从数据库请求数据
+    async getList(period) {
+      // period="long" & "short"
       uni.showLoading({
         title: "加载中",
       });
-      wx.getStorage({
-        key: "userOpenId",
-        success(res) {
-          // 从缓存获取openID成功之后通过openID查询用户发布的信息
-          wx.cloud.callFunction({
-            name: "getJobList",
-            data: {
-              JobColpath: "longTermPost",
-              limit: that.longTermParams.limit,
-              skip: that.longTermParams.skip,
-              openid: res.data,
-            },
-            success(res) {
-              // 请求成功之后把数据存进数据容器中
-              if (res.result.data.length === 0) {
-                // 没有下一页数据了
-                that.longTermParams.hasMore = false;
-                uni.showToast({
-                  title: "没有更多数据了",
-                  icon: "none",
-                });
-                return;
-              }
-              that.longTermInfo.push(...res.result.data);
-              uni.hideLoading();
-            },
-            fail(err) {
-              console.log(err);
-            },
-          });
+      // 从缓存中获取openid
+      const do1 = await getStorage("userOpenId");
+      // 根据openid查询用户发的信息
+      const do2 = await wx.cloud.callFunction({
+        name: "getJobList",
+        data: {
+          // 根据函数的实参判断请求长期还是短期
+          JobColpath: `${period === "long" ? "longTermPost" : "shortTermPost"}`,
+          limit:
+            period === "long"
+              ? this.longTermParams.limit
+              : this.shortTermParams.limit,
+          skip:
+            period === "long"
+              ? this.longTermParams.skip
+              : this.shortTermParams.skip,
+          openid: do1.data,
         },
       });
-    },
-    getShortTermList() {
-      let that = this;
-      uni.showLoading({
-        title: "加载中",
-      });
-      wx.getStorage({
-        key: "userOpenId",
-        success(res) {
-          // 从缓存获取openID成功之后通过openID查询用户发布的信息
-          wx.cloud.callFunction({
-            name: "getJobList",
-            data: {
-              JobColpath: "shortTermPost",
-              limit: that.shortTermParams.limit,
-              skip: that.shortTermParams.skip,
-              openid: res.data,
-            },
-            success(res) {
-              // 请求成功之后把数据存进数据容器中
-              if (res.result.data.length === 0) {
-                // 没有下一页数据了
-                that.shortTermParams.hasMore = false;
-                uni.showToast({
-                  title: "没有更多数据了",
-                  icon: "none",
-                });
-                return;
-              }
-              that.shortTermInfo.push(...res.result.data);
-              uni.hideLoading();
-            },
-            fail(err) {
-              console.log(err);
-            },
+      if (do2.errMsg === "cloud.callFunction:ok") {
+        // 数据库请求成功
+        // 把数据存进数据容器中;
+        if (do2.result.data.length === 0) {
+          // 没有下一页数据了
+          period === "long"
+            ? (this.longTermParams.hasMore = false)
+            : (this.shortTermParams.hasMore = false);
+          // that.longTermParams.hasMore = false;
+          uni.showToast({
+            title: "没有更多数据了",
+            icon: "none",
           });
-        },
-      });
+          return;
+        }
+        period === "long"
+          ? this.longTermInfo.push(...do2.result.data)
+          : this.shortTermInfo.push(...do2.result.data);
+        // that.longTermInfo.push(...res.result.data);
+        uni.hideLoading();
+      } else {
+        // 数据库请求失败
+        uni.showToast({
+          title: "请求失败，请检查网络",
+          icon: "none",
+        });
+      }
     },
     // 页面滚动到了底部
     handleToLower() {
@@ -150,7 +130,7 @@ export default {
         // 判断是否有下一页
         if (this.longTermParams.hasMore) {
           this.longTermParams.skip += this.longTermParams.limit;
-          this.getLongTermList();
+          this.getList("long");
         } else {
           // 没有下一页
           uni.showToast({
@@ -162,7 +142,7 @@ export default {
       } else {
         if (this.shortTermParams.hasMore) {
           this.shortTermParams.skip += this.shortTermParams.limit;
-          this.getShortTermList();
+          this.getList("short");
         } else {
           uni.showToast({
             title: "没有更多数据了",
@@ -172,74 +152,75 @@ export default {
         }
       }
     },
-    optionClick(item) {
+    async optionClick(item) {
+      await showModal("您确定要删除这条信息吗？");
       // 进行删除操作
-      uni.showLoading({
+      await uni.showLoading({
         title: "正在删除",
       });
-      // 判断是删除哪个集合中的数据
-      this.curTabIndex === 0
-        ? (this.colPath = "longTermPost")
-        : (this.colPath = "shortTermPost");
-      let that = this;
-      // 调用云函数删除数据
-      wx.cloud.callFunction({
+      // 判断用户是否有上传照片在云存储，如果有，删除
+      if (item.userImg !== "") {
+        await wx.cloud.deleteFile({
+          fileList: [item.userImg],
+        });
+      }
+      // 删除
+      const do2 = await wx.cloud.callFunction({
         name: "deletPost",
         data: {
-          colPath: that.colPath,
+          // 判断是删除哪个集合中的数据
+          colPath: `${
+            this.curTabIndex === 0 ? "longTermPost" : "shortTermPost"
+          }`,
           id: item._id,
         },
-        success(res) {
-          // 删除成功后重新刷新页面
-          if (that.curTabIndex === 0) {
-            // 判断刷新哪一个页面
-            (that.longTermInfo = []),
-              (that.longTermParams = {
-                skip: 0,
-                limit: 3,
-                hasMore: true,
-              });
-            that.getLongTermList();
-            uni.showToast({
-              title: "删除成功",
-              icon: "none",
-            });
-          } else {
-            (that.shortTermInfo = []),
-              (that.shortTermParams = {
-                skip: 0,
-                limit: 3,
-                hasMore: true,
-              });
-            that.getShortTermList();
-            uni.showToast({
-              title: "删除成功",
-              icon: "none",
-            });
-          }
-        },
-        fail(err) {
-          console.log(err);
-          uni.showToast({
-            title: "删除失败",
-            icon: "none",
-          });
-        },
       });
+      // 删除操作完成后给用户提示信息
+      if (do2.errMsg === "cloud.callFunction:ok") {
+        uni.showToast({
+          title: "删除成功",
+          icon: "success",
+        });
+        // 判断刷新哪一个数据
+        if (this.curTabIndex === 0) {
+          // 刷新长期的参数
+          this.longTermInfo = [];
+          this.longTermParams = {
+            skip: 0,
+            limit: 3,
+            hasMore: true,
+          };
+          this.getList("long");
+        } else {
+          // 刷新短期的参数
+          this.shortTermInfo = [];
+          this.shortTermParams = {
+            skip: 0,
+            limit: 3,
+            hasMore: true,
+          };
+          this.getList("short");
+        }
+      } else {
+        uni.showToast({
+          title: "删除失败，请检查网络",
+          icon: "none",
+        });
+      }
     },
     // 手指滑动换页
     handleSwip(e) {
-       if (e.direction === "right" && this.curTabIndex === 1) {
+      if (e.direction === "right" && this.curTabIndex === 1) {
         // 手指向右滑动，页面向左
         this.curTabIndex = 0;
-        this.$refs.tabControl.curIndex = 0
+        this.$refs.tabControl.curIndex = 0;
       } else if (e.direction === "left" && this.curTabIndex === 0) {
         this.curTabIndex = 1;
-        this.$refs.tabControl.curIndex = 1
+        this.$refs.tabControl.curIndex = 1;
       } else {
         uni.showToast({
           title: "没有页面啦，不要再滑啦！",
-          icon:"none"
+          icon: "none",
         });
       }
     },

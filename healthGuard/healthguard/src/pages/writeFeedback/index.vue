@@ -61,7 +61,6 @@ export default {
 
 <style lang="scss" scoped>
 .feedback {
- 
   .feedback-form {
     position: absolute;
     top: 50%;

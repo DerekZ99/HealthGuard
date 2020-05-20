@@ -1,6 +1,6 @@
 <template>
   <view class="jobWanted">
-    <view class="form-title">{{formTitle}}</view>
+    <view class="form-title">{{ formTitle }}</view>
 
     <form @submit="formSubmit" class="job-form">
       <view class="form-item">
@@ -11,11 +11,13 @@
             placeholder="请输入您的姓名"
             name="posterName"
             v-model="textValue1"
-            @blur="checkVal(textValue1,'posterName')"
-            :class="{warning:!isNameOk}"
+            @blur="checkVal(textValue1, 'posterName')"
+            :class="{ warning: !isNameOk }"
           />
           <!-- 警告信息 -->
-          <view class="warning-text" v-show="!isNameOk">请不要包含数字，空格或符号</view>
+          <view class="warning-text" v-show="!isNameOk"
+            >请不要包含数字，空格或符号</view
+          >
           <!-- 警告信息 -->
         </view>
       </view>
@@ -28,23 +30,35 @@
             placeholder="请输入您的手机号码"
             name="phone"
             v-model="textValue2"
-            @blur="checkVal(textValue2,'phone')"
-            :class="{warning:!isPhoneOk}"
+            @blur="checkVal(textValue2, 'phone')"
+            :class="{ warning: !isPhoneOk }"
           />
           <!-- 警告信息 -->
-          <view class="warning-text" v-show="!isPhoneOk">请输入正确的手机号码</view>
+          <view class="warning-text" v-show="!isPhoneOk"
+            >请输入正确的手机号码</view
+          >
           <!-- 警告信息 -->
         </view>
       </view>
 
       <view class="form-item">
         <view class="item-title">工作经历：</view>
-        <textarea minlength="-1" type="text" placeholder="请输入您的工作经历" name="experience" />
+        <textarea
+          minlength="-1"
+          type="text"
+          placeholder="请输入您的工作经历"
+          name="experience"
+        />
       </view>
 
       <view class="form-item">
         <view class="item-title">可提供的服务：</view>
-        <textarea minlength="-1" type="text" placeholder="请输入您可提供的服务" name="service" />
+        <textarea
+          minlength="-1"
+          type="text"
+          placeholder="请输入您可提供的服务"
+          name="service"
+        />
       </view>
 
       <view class="form-item">
@@ -63,7 +77,9 @@
 
       <view class="btns">
         <!-- 提交按钮 -->
-        <button type="primary" class="sumbitBtn" form-type="submit">提交</button>
+        <button type="primary" class="sumbitBtn" form-type="submit">
+          提交
+        </button>
       </view>
     </form>
   </view>
@@ -82,7 +98,7 @@ export default {
       isNameOk: true,
       isPhoneOk: true,
       // 用户是否上传了他自己的头像
-      isUpLoadImg: false
+      isUpLoadImg: false,
     };
   },
   onLoad(options) {
@@ -90,16 +106,16 @@ export default {
       options.id === "long" ? "发布长期求职信息" : "发布短期求职信息";
   },
   methods: {
-    formSubmit(e) {
+    async formSubmit(e) {
       let that = this;
       uni.showLoading({
-        title: "表单上传中"
+        title: "表单上传中",
       });
       // 检查表单里是否有空值
       if (Object.values(e.detail.value).includes("")) {
         uni.showToast({
           title: "请填写完整的表单",
-          icon: "none"
+          icon: "none",
         });
         return;
       }
@@ -108,77 +124,86 @@ export default {
         // 有非法值，阻止提交
         uni.showToast({
           title: "表单格式不正确，请输入正确的格式",
-          icon: "none"
+          icon: "none",
         });
         return;
       }
       // 判断用户是否有上传头像
+      const form = e.detail.value;
       if (this.isUpLoadImg) {
-        // 用户有上传头像，先把头像上传到数据库，然后拿到他的fileID并上传数据库
-        wx.cloud.uploadFile({
+        const do1 = await wx.cloud.uploadFile({
           cloudPath: `posterImg/${new Date().getTime()}-${Math.floor(
             Math.random() * 1000
           )}`,
-          filePath: that.imgFilePath,
-          success(res) {
-            // 上传头像成功后回调上传数据的函数
-            that.upLoadData(res.fileID, e.detail.value);
-          },
-          fail(err) {
-            console.log(err + "上传失败");
-          }
+          filePath: this.imgFilePath,
         });
+        if (do1.errMsg === "cloud.uploadFile:ok") {
+          // 图片上传成功
+          this.upLoadData(do1.fileID, form);
+        } else {
+          // 图片上传失败
+          uni.showToast({
+            title: "图片上传失败，请检查网络",
+            icon: "none",
+          });
+          return;
+        }
       } else {
         // 用户没有上传头像，直接调用上传数据的函数
-        this.upLoadData("", e.detail.value);
+        this.upLoadData("", form);
       }
     },
     handleChooseImg() {
       uni.showLoading({
-        title: "加载中"
+        title: "加载中",
       });
+      // 这个函数被挂载到了vue上，详情见main.js
       this.chooseImg(1)
-        .then(res => {
+        .then((res) => {
           this.isUpLoadImg = true;
           this.imgFilePath = res.tempFilePaths[0];
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
         });
     },
     // 上传数据到数据库
-    upLoadData(img, form) {
-      let userImg = img;
-      function uploadForm(collection) {
-        db.collection(collection).add({
+    async upLoadData(img, form) {
+      const do1 = await db
+        .collection(
+          `${
+            this.formTitle === "发布短期求职信息"
+              ? "shortTermPost"
+              : "longTermPost"
+          }`
+        )
+        .add({
           data: {
             post: form,
-            userImg,
-            pTime: new Date().getTime()
+            userImg: img,
+            pTime: new Date().getTime(),
           },
-          success(res) {
-            uni.showToast({
-              title: "提交成功",
-              icon: "success"
-            });
-            // 表单提交成功后退出页面，返回上级
-            setTimeout(() => {
-              wx.navigateBack({
-                delta: 1
-              });
-            }, 2000);
-          },
-          fail(err) {
-            console.log(err);
-            uni.showToast({
-              title: "提交失败，请检查网络"
-            });
-          }
         });
+      if (do1.errMsg === "collection.add:ok") {
+        // 表单上传成功
+        uni.showToast({
+          title: "提交成功",
+          icon: "success",
+        });
+        // 退出页面，返回上级
+        setTimeout(() => {
+          wx.navigateBack({
+            delta: 1,
+          });
+        }, 2000);
+      } else {
+        // 表单上传失败
+        uni.showToast({
+          title: "提交失败，请检查网络",
+          icon: "none",
+        });
+        return;
       }
-      this.formTitle === "发布短期求职信息"
-        ? uploadForm("shortTermPost")
-        : uploadForm("longTermPost");
     },
     // 清除图片
     handleClearImg() {
@@ -187,7 +212,7 @@ export default {
         "cloud://tryout-edov9.7472-tryout-edov9-1302058975/imgHolder.jpg";
       uni.showToast({
         title: "已清除",
-        icon: "success"
+        icon: "success",
       });
     },
     // 正则验证
@@ -201,12 +226,16 @@ export default {
       } else {
         this.isPhoneOk = regPhone.test(val);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
+.jobWanted {
+  background-color: #fff;
+  height: 100%;
+}
 .form-title {
   color: #000;
   font-weight: bold;

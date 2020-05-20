@@ -50,8 +50,6 @@
 
 <script>
 import moment from "moment";
-// 滑动模块
-
 
 export default {
   props: {

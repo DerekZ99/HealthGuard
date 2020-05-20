@@ -34,7 +34,10 @@
           >
             修改
           </button>
-          <button class="question-option delete" @click="handleDelete(item)">
+          <button
+            class="question-option delete"
+            @click="handleDeleteQuestion(item)"
+          >
             删除
           </button>
         </view>
@@ -54,6 +57,7 @@
 <script>
 import moment from "moment";
 import HealthPostDetail from "components/healthPostDetail";
+import { showModal, getStorage } from "@/api/index";
 
 const db = wx.cloud.database();
 export default {
@@ -77,106 +81,81 @@ export default {
       return moment(time).format("YYYY年MM月DD号");
     },
     // 用户点击了删除问卷按钮
-    handleDelete() {
+    async handleDelete() {
       let that = this;
-      wx.showModal({
-        title: "提示",
-        content: "您确定要删除健康调查问卷吗？",
-        success(res) {
-          if (res.confirm) {
-            uni.showLoading({
-              title: "删除中",
-            });
-            wx.cloud.callFunction({
-              name: "deletPost",
-              data: {
-                colPath: "healthSurvey",
-                id: that.surveyInfo._id,
-              },
-              success(res) {
-                uni.showToast({
-                  title: "删除成功",
-                  icon: "success",
-                });
-                that.getSurvey();
-              },
-              fail(err) {
-                uni.showToast({
-                  title: "删除失败，请检查网络",
-                  icon: "none",
-                });
-              },
-            });
-          } else if (res.cancel) {
-            return;
-          }
+      const do1 = await showModal("您确定要删除健康调查问卷吗？");
+      // 通过_id删除数据库中的文件
+      const do2 = await wx.cloud.callFunction({
+        name: "deletPost",
+        data: {
+          colPath: "healthSurvey",
+          id: this.surveyInfo._id,
         },
       });
+      // 根据返回的结果提示用户
+      if (do2.errMsg === "cloud.callFunction:ok") {
+        uni.showToast({
+          title: "删除成功",
+          icon: "success",
+        });
+        this.getQuestion();
+      } else {
+        uni.showToast({
+          title: "删除失败，请检查网络",
+          icon: "none",
+        });
+      }
     },
     // 查询问卷
-    getSurvey() {
-      let that = this;
-      // 根据openid查询用户提交的信息(回调地狱写法)
-      wx.getStorage({
-        key: "userOpenId",
-        success(res) {
-          db.collection("healthSurvey")
-            .where({
-              _openid: res.data,
-            })
-            .get({
-              success(res) {
-                if (res.data.length === 0) {
-                  // 用户没有填过问卷
-                  that.hasSurvey = false;
-                } else {
-                  // 用户填写了问卷
-                  that.hasSurvey = true;
-                  that.surveyInfo = res.data[0];
-                }
-              },
-              fail(err) {
-                uni.showToast({
-                  title: "查询失败，请检查网络",
-                  icon: "none",
-                });
-                console.log(err);
-              },
-            });
-        },
-      });
+    async getSurvey() {
+      // 从缓存中提取openId
+      const do1 = await getStorage("userOpenId");
+      // 根据openid 查询用户的问卷
+      const do2 = await db
+        .collection("healthSurvey")
+        .where({ _openid: do1.data })
+        .get();
+      // 判断查询结果
+      if (do2.errMsg === "collection.get:ok") {
+        // 数据库access成功
+        if (do2.data.length === 0) {
+          // 用户没有填过问卷;
+          this.hasSurvey = false;
+        } else {
+          // 用户填写了问卷
+          this.hasSurvey = true;
+          this.surveyInfo = do2.data[0];
+        }
+      } else {
+        // 数据库access失败
+        uni.showToast({
+          title: "查询失败，请检查网络",
+          icon: "none",
+        });
+      }
     },
     // 查询用户提问
-    getQuestion() {
-      let that = this;
-      wx.getStorage({
-        key: "userOpenId",
-        success(res) {
-          db.collection("healthPost")
-            .where({
-              _openid: res.data,
-            })
-            .get({
-              success(res) {
-                if (res.data.length === 0) {
-                  // 用户没有提问过
-                  that.hasQuestion = false;
-                } else {
-                  // 用户填写了问卷
-                  that.hasQuestion = true;
-                  that.questionInfo = res.data;
-                }
-              },
-              fail(err) {
-                uni.showToast({
-                  title: "查询失败，请检查网络",
-                  icon: "none",
-                });
-                console.log(err);
-              },
-            });
-        },
-      });
+    async getQuestion() {
+      const do1 = await getStorage("userOpenId");
+      const do2 = await db
+        .collection("healthPost")
+        .where({ _openid: do1.data })
+        .get();
+      if (do2.errMsg === "collection.get:ok") {
+        if (do2.data.length === 0) {
+          // 用户没有提问过
+          this.hasQuestion = false;
+        } else {
+          // 用户有提问
+          this.hasQuestion = true;
+          this.questionInfo = do2.data;
+        }
+      } else {
+        uni.showToast({
+          title: "查询失败，请检查网络",
+          icon: "none",
+        });
+      }
     },
     // 跳转到问卷填写页面
     jumpToSurvey() {
@@ -185,41 +164,36 @@ export default {
       });
     },
     //删除帖子
-    handleDelete(item) {
-      let that = this;
-      wx.showModal({
-        title: "提示",
-        content: "您确定要删除这个提问吗？",
-        success(res) {
-          if (res.confirm) {
-            uni.showLoading({
-              title: "删除中",
-            });
-            wx.cloud.callFunction({
-              name: "deletPost",
-              data: {
-                colPath: "healthPost",
-                id: item._id,
-              },
-              success(res) {
-                uni.showToast({
-                  title: "删除成功",
-                  icon: "success",
-                });
-                that.getQuestion();
-              },
-              fail(err) {
-                uni.showToast({
-                  title: "删除失败，请检查网络",
-                  icon: "none",
-                });
-              },
-            });
-          } else if (res.cancel) {
-            return;
-          }
+    async handleDeleteQuestion(item) {
+      // 弹窗提示用户是否确定删除
+      const do1 = await showModal("您确定要删除这个提问吗？");
+      // 先从云存储中删除图片
+      if (item.img.length !== 0) {
+        const do2 = await wx.cloud.deleteFile({
+          fileList: item.img,
+        });
+      }
+      // 在数据库中删除这条提问
+      const do3 = await wx.cloud.callFunction({
+        name: "deletPost",
+        data: {
+          colPath: "healthPost",
+          id: item._id,
         },
       });
+      // 删除操作完成后给用户提示信息
+      if (do3.errMsg === "cloud.callFunction:ok") {
+        uni.showToast({
+          title: "删除成功",
+          icon: "success",
+        });
+        this.getQuestion();
+      } else {
+        uni.showToast({
+          title: "删除失败，请检查网络",
+          icon: "none",
+        });
+      }
     },
     //编辑帖子
     async handleEdit(item) {
@@ -239,9 +213,7 @@ export default {
 
 <style lang="scss" scoped>
 .profile-health {
-  background-color: #eee;
   padding: 20rpx;
-  height: 100vh;
 }
 // 有问卷时显示的内容
 .survey {

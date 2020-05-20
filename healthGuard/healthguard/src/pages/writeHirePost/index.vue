@@ -253,6 +253,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
 .hire-form {
   .form-title {
     color: #000;
