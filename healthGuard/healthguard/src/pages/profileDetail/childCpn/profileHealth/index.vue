@@ -98,7 +98,7 @@ export default {
           title: "删除成功",
           icon: "success",
         });
-        this.getQuestion();
+        this.getSurvey();
       } else {
         uni.showToast({
           title: "删除失败，请检查网络",

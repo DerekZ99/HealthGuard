@@ -88,7 +88,9 @@
 
       <view class="form-item">
         9. 最近的社区卫生站/医院步行过去需要多长时间？(按老人实际步行速度)
-        <radio-group name="9. 最近的社区卫生站/医院步行过去需要多长时间？(按老人实际步行速度)">
+        <radio-group
+          name="9. 最近的社区卫生站/医院步行过去需要多长时间？(按老人实际步行速度)"
+        >
           <radio value="5分钟以内">5分钟以内</radio>
           <radio value="6-10分钟">6-10分钟</radio>
           <radio value="10-15分钟">10-15分钟</radio>
@@ -100,7 +102,9 @@
       <view class="form-item">
         10. 您家里有哪些健康检测仪器？(您现在用着哪些特殊的生活用品？)
         <text class="multi">【多选题】</text>
-        <checkbox-group name="10. 您家里有哪些健康检测仪器？(您现在用着哪些特殊的生活用品？)">
+        <checkbox-group
+          name="10. 您家里有哪些健康检测仪器？(您现在用着哪些特殊的生活用品？)"
+        >
           <checkbox value="体温计">体温计</checkbox>
           <checkbox value="血糖仪">血糖仪</checkbox>
           <checkbox value="老人床垫">老人床垫</checkbox>
@@ -272,7 +276,9 @@
       <view class="form-item">
         23. 您平时参加体育锻炼吗？如果参加选择最常用的锻炼方式
         <text class="multi">【多选题】</text>
-        <checkbox-group name="23. 您平时参加体育锻炼吗？如果参加选择最常用的锻炼方式">
+        <checkbox-group
+          name="23. 您平时参加体育锻炼吗？如果参加选择最常用的锻炼方式"
+        >
           <checkbox value="散步">散步</checkbox>
           <checkbox value="跑步">跑步</checkbox>
           <checkbox value="自行车">自行车</checkbox>
@@ -304,7 +310,9 @@
 
       <view class="form-item">
         26. 您对现在居家养老服务给予老年人的关注程度满意吗？
-        <radio-group name="26. 您对现在居家养老服务给予老年人的关注程度满意吗？">
+        <radio-group
+          name="26. 您对现在居家养老服务给予老年人的关注程度满意吗？"
+        >
           <radio value="很满意">很满意</radio>
           <radio value="较满意">较满意</radio>
           <radio value="不太满意">不太满意</radio>
@@ -343,7 +351,10 @@
 
           <view class="special-row">
             <view class="row-left">健康讲座</view>
-            <checkbox-group name="28. 您认为以上服务开展的周期大概多长?-健康讲座" class="row-right">
+            <checkbox-group
+              name="28. 您认为以上服务开展的周期大概多长?-健康讲座"
+              class="row-right"
+            >
               <view class="right-item">
                 <checkbox value="每天"></checkbox>
               </view>
@@ -361,7 +372,10 @@
 
           <view class="special-row">
             <view class="row-left">义诊服务</view>
-            <checkbox-group name="28. 您认为以上服务开展的周期大概多长?-义诊服务" class="row-right">
+            <checkbox-group
+              name="28. 您认为以上服务开展的周期大概多长?-义诊服务"
+              class="row-right"
+            >
               <view class="right-item">
                 <checkbox value="每天"></checkbox>
               </view>
@@ -379,7 +393,10 @@
 
           <view class="special-row">
             <view class="row-left">量血压</view>
-            <checkbox-group name="28. 您认为以上服务开展的周期大概多长?-量血压" class="row-right">
+            <checkbox-group
+              name="28. 您认为以上服务开展的周期大概多长?-量血压"
+              class="row-right"
+            >
               <view class="right-item">
                 <checkbox value="每天"></checkbox>
               </view>
@@ -397,7 +414,10 @@
 
           <view class="special-row">
             <view class="row-left">测血压</view>
-            <checkbox-group name="28. 您认为以上服务开展的周期大概多长?-测血压" class="row-right">
+            <checkbox-group
+              name="28. 您认为以上服务开展的周期大概多长?-测血压"
+              class="row-right"
+            >
               <view class="right-item">
                 <checkbox value="每天"></checkbox>
               </view>
@@ -417,7 +437,9 @@
 
       <view class="form-item">
         29. 您觉得生活中在健康层次带来最大的不便来自下列那方面？
-        <radio-group name="29. 您觉得生活中在健康层次带来最大的不便来自下列那方面？">
+        <radio-group
+          name="29. 您觉得生活中在健康层次带来最大的不便来自下列那方面？"
+        >
           <radio value="经济状况">经济状况</radio>
           <radio value="身体物理状况">身体物理状况</radio>
           <radio value="心理觉得孤独">心理觉得孤独</radio>
@@ -457,28 +479,30 @@ export default {
     // 表单提交
     async handleSubmit(e) {
       uni.showLoading({
-        title: "提交中"
+        title: "提交中",
       });
-      db.collection("healthSurvey").add({
-        data: {
-          formType:"老年人健康调查问卷",
-          form: e.detail.value,
-          pTime: new Date().getTime()
-        },
-        success(res) {
+      const do1 = await db
+        .collection("healthSurvey")
+        .add({
+          data: {
+            formType: "老年人健康调查问卷",
+            form: e.detail.value,
+            pTime: new Date().getTime(),
+          },
+        })
+        .then((res) => {
           uni.showToast({
             title: "提交成功",
-            icon: "none"
+            icon: "none",
           });
           setTimeout(() => {
-            wx.navigateBack({
-              delta: 1
+            wx.redirectTo({
+              url:"/pages/healthCheck/index"
             });
           }, 1500);
-        }
-      });
-    }
-  }
+        });
+    },
+  },
 };
 </script>
 

@@ -103,7 +103,6 @@ export default {
           period === "long"
             ? (this.longTermParams.hasMore = false)
             : (this.shortTermParams.hasMore = false);
-          // that.longTermParams.hasMore = false;
           uni.showToast({
             title: "没有更多数据了",
             icon: "none",
@@ -112,8 +111,7 @@ export default {
         }
         period === "long"
           ? this.longTermInfo.push(...do2.result.data)
-          : this.shortTermInfo.push(...do2.result.data);
-        // that.longTermInfo.push(...res.result.data);
+          : this.shortTermInfo.push(...do2.result.data);;
         uni.hideLoading();
       } else {
         // 数据库请求失败

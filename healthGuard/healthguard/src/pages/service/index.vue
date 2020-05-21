@@ -39,7 +39,6 @@ export default {
   },
   data() {
     return {
-      serviceType: "",
       // 数据库集合路径
       hireColpath: "",
       JobColpath: "",
@@ -63,28 +62,22 @@ export default {
   },
 
   onLoad(options) {
-    this.serviceType = options.id;
-    if (options.id === "long") {
-      wx.setNavigationBarTitle({
-        title: "长期服务",
-      });
-      // 根据option.id给数据库集合名称赋值
-      this.hireColpath = "longTermJob";
-      this.JobColpath = "longTermPost";
-    } else {
-      wx.setNavigationBarTitle({
-        title: "短期服务",
-      });
-      this.hireColpath = "shortTermJob";
-      this.JobColpath = "shortTermPost";
-    }
+    wx.setNavigationBarTitle({
+      title: `${options.id === "long" ? "长期服务" : "短期服务"}`,
+    });
+    this.hireColpath = `${
+      options.id === "long" ? "longTermJob" : "shortTermJob"
+    }`;
+    this.JobColpath = `${
+      options.id === "long" ? "longTermPost" : "shortTermPost"
+    }`;
     // 初次发送请求获取数据
-    this.getHire();
-    this.getJob();
+    this.getData("job");
+    this.getData("hire");
   },
   methods: {
     tabClicked(index) {
-      // 防止用户多次点击出现bug
+      // 防止用户多次点击出现报错
       if (this.curTabIndex !== index) {
         this.curTabIndex = index;
       } else {
@@ -98,7 +91,7 @@ export default {
         // 判断是否有下一页
         if (this.jobParams.hasMore) {
           this.jobParams.skip += this.jobParams.limit;
-          this.getJob();
+          this.getData("job");
         } else {
           // 没有下一页
           uni.showToast({
@@ -110,7 +103,7 @@ export default {
       } else {
         if (this.hireParams.hasMore) {
           this.hireParams.skip += this.hireParams.limit;
-          this.getHire();
+          this.getData("hire");
         } else {
           uni.showToast({
             title: "没有更多数据了",
@@ -120,24 +113,30 @@ export default {
         }
       }
     },
-    // 请求招聘数据
-    getHire() {
-      let that = this;
+    async getData(type) {
+      // type的值 hire & job
       uni.showLoading({
         title: "数据加载中",
       });
-      wx.cloud.callFunction({
-        name: "getHireList",
-        data: {
-          hireColpath: that.hireColpath,
-          limit: that.hireParams.limit,
-          skip: that.hireParams.skip,
-        },
-        success(res) {
+      // 向数据库请求数据
+      const do1 = await wx.cloud
+        .callFunction({
+          name: "getJobList",
+          data: {
+            JobColpath: type === "hire" ? this.hireColpath : this.JobColpath,
+            limit:
+              type === "hire" ? this.hireParams.limit : this.jobParams.limit,
+            skip: type === "hire" ? this.hireParams.skip : this.jobParams.skip,
+          },
+        })
+        .then((res) => {
           // 判断是否还有下一页数据
           if (res.result.data.length === 0) {
             // 没有更多数据了
-            that.hireParams.hasMore = false;
+            // that.hireParams.hasMore = false;
+            type === "hire"
+              ? (this.hireParams.hasMore = false)
+              : (this.jobParams.hasMore = false);
             uni.showToast({
               title: "没有更多数据了",
               icon: "none",
@@ -145,60 +144,24 @@ export default {
             return;
           }
           // 数据请求成功后存入本地变量中
-          that.hireInfo.push(...res.result.data);
+          type === "hire"
+            ? this.hireInfo.push(...res.result.data)
+            : this.jobInfo.push(...res.result.data);
           uni.hideLoading();
-        },
-        fail(err) {
-          console.log(err);
-        },
-      });
-    },
-    // 请求求职数据
-    getJob() {
-      let that = this;
-      uni.showLoading({
-        title: "数据加载中",
-      });
-      //通过云函数请求数据库数据
-      wx.cloud.callFunction({
-        name: "getJobList",
-        data: {
-          JobColpath: that.JobColpath,
-          limit: that.jobParams.limit,
-          skip: that.jobParams.skip,
-        },
-        success(res) {
-          // 判断是否还有下一页数据
-          if (res.result.data.length === 0) {
-            // 没有更多数据了
-            that.jobParams.hasMore = false;
-            uni.showToast({
-              title: "没有更多数据了",
-              icon: "none",
-            });
-            return;
-          }
-          // 数据请求成功后存入本地变量中
-          that.jobInfo.push(...res.result.data);
-          uni.hideLoading();
-        },
-        fail(err) {
-          console.log(err);
-        },
-      });
+        });
     },
     handleSwip(e) {
       if (e.direction === "right" && this.curTabIndex === 1) {
         // 手指向右滑动，页面向左
         this.curTabIndex = 0;
-        this.$refs.tabControl.curIndex = 0
+        this.$refs.tabControl.curIndex = 0;
       } else if (e.direction === "left" && this.curTabIndex === 0) {
         this.curTabIndex = 1;
-        this.$refs.tabControl.curIndex = 1
+        this.$refs.tabControl.curIndex = 1;
       } else {
         uni.showToast({
           title: "没有页面啦，不要再滑啦！",
-          icon:"none"
+          icon: "none",
         });
       }
     },

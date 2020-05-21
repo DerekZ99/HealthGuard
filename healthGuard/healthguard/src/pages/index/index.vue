@@ -58,7 +58,6 @@
       <!-- 二维码部分 开始 -->
       <view class="join">
         <img
-          show-menu-by-longpress
           mode="widthFix"
           class="code"
           src="cloud://tryout-edov9.7472-tryout-edov9-1302058975/dcode.jpg"
@@ -83,7 +82,10 @@
           联系居委、社工
         </view>
       </view>
-      <contact-info @closeWindow="showContact" v-if="isShowContact"></contact-info>
+      <contact-info
+        @closeWindow="showContact"
+        v-if="isShowContact"
+      ></contact-info>
       <!-- 联系社工部分 结束 -->
     </swiper-action>
   </view>

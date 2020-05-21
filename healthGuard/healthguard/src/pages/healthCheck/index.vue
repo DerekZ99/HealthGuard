@@ -17,15 +17,15 @@
     <!-- ==============问卷填写入口 开始============== -->
     <view class="survey">
       <view v-if="noSurvey" class="no-survey">
-        <view class="survey-text">{{
+        <view class="survey-text">
+          {{
           isUserLogin
-            ? "您已登录，但是还没有填写健康调查问卷，点击下方按钮填写健康调查问卷"
-            : "您还没有登录，登录后可点击下方按钮填写调查问卷"
-        }}</view>
+          ? "您已登录，但是还没有填写健康调查问卷，点击下方按钮填写健康调查问卷"
+          : "您还没有登录，登录后可点击下方按钮填写调查问卷"
+          }}
+        </view>
         <view class="surveyBtn">
-          <button @click="handleJump('healthSurvey')" :disabled="!isUserLogin">
-            填写健康调查问卷
-          </button>
+          <button @click="handleJump('healthSurvey')" :disabled="!isUserLogin">填写健康调查问卷</button>
         </view>
       </view>
       <view v-else class="has-survey">您已填写过健康调查问卷</view>
@@ -34,9 +34,9 @@
 
     <!-- 医生问答入口 开始 -->
     <view class="healthcare">
-      <view class="text">
-        {{ isUserLogin ? "名医解答板块是健康通为用户提供的线上问诊功能，您现在已登录，可前往名医解答版块寻求专业医生解答" : "名医解答板块是健康通为用户提供的线上问诊功能，登录后可前往名医解答版块寻求专业医生解答" }}
-      </view>
+      <view
+        class="text"
+      >{{ isUserLogin ? "名医解答板块是惠通为用户提供的线上问诊功能，您现在已登录，可前往名医解答版块寻求专业医生解答" : "名医解答板块是惠通为用户提供的线上问诊功能，登录后可前往名医解答版块寻求专业医生解答" }}</view>
       <view class="entryBtn">
         <button @click="handleJump('healthSection')" :disabled="!isUserLogin">前往名医解答版块</button>
       </view>
@@ -47,67 +47,56 @@
 
 <script>
 import UserInfo from "components/UserInfo";
+import { getStorage } from "@/api/index";
 
 const db = wx.cloud.database();
 export default {
   components: {
-    UserInfo,
-  },
-  onShow() {
-    this.syncData();
-    this.checkForm();
+    UserInfo
   },
   mounted() {
     this.syncData();
-    // this.checkForm();
   },
   data() {
     return {
       isUserLogin: false,
       // 判断用户有没有填过表格,true=没填过，false=填过
-      noSurvey: true,
+      noSurvey: true
     };
   },
   watch: {
     isUserLogin() {
       this.checkForm();
-    },
+    }
   },
   methods: {
     userLogin() {
       this.isUserLogin = !this.isUserLogin;
     },
     // 判断用户之前是否有填写过表格(回调地狱写法)
-    checkForm() {
-      const that = this;
-      wx.getStorage({
-        key: "userOpenId",
-        success(res) {
-          // 利用openid查询数据库该用户是否提交过问卷
-          db.collection("healthSurvey")
-            .where({
-              _openid: res.data,
-            })
-            .get({
-              success(res) {
-                if (res.data.length === 0) {
-                  // 用户没有填写过表单
-                  that.noSurvey = true;
-                } else {
-                  // 用户已经填写过了
-                  that.noSurvey = false;
-                }
-              },
-              fail(err) {
-                // 查询失败
-                uni.showToast({
-                  title: "加载失败，请检查网路",
-                  icon: "none",
-                });
-              },
-            });
-        },
-      });
+    async checkForm() {
+      const do1 = await getStorage("userOpenId");
+      const do2 = await db
+        .collection("healthSurvey")
+        .where({
+          _openid: do1.data
+        })
+        .get()
+        .then(res => {
+          if (res.data.length === 0) {
+            // 用户没有填写过表单
+            this.noSurvey = true;
+          } else {
+            // 用户已经填写过了
+            this.noSurvey = false;
+          }
+        })
+        .catch(err => {
+          uni.showToast({
+            title: "加载失败，请检查网路",
+            icon: "none"
+          });
+        });
     },
     // 同步登录状态
     syncData() {
@@ -120,16 +109,16 @@ export default {
           } else {
             that.isUserLogin = res.data;
           }
-        },
+        }
       });
     },
     // 填写问卷按钮被点击，跳转到问卷页面
     handleJump(page) {
       wx.navigateTo({
-        url: `/pages/${page}/index`,
+        url: `/pages/${page}/index`
       });
-    },
-  },
+    }
+  }
 };
 </script>
 

@@ -1,39 +1,11 @@
 <template>
   <view class="contact">
-    <view class="contact-detail">
-      <view class="detail-item">阳光天使社工机构</view>
-      <view class="detail-item">地址​：新杨区青云路85号</view>
-      <view class="detail-item">电话​：8458 0156</view>
-    </view>
-
-    <view class="contact-detail">
-      <view class="detail-item">​新杨区居委会</view>
-      <view class="detail-item">地址​：新杨区林荫路88号</view>
-      <view class="detail-item">电话​：8458 0156</view>
-    </view>
-
-    <view class="contact-detail">
-      <view class="detail-item">乐养老年护理机构</view>
-      <view class="detail-item">地址​：黄龙区玉山路75号</view>
-      <view class="detail-item">电话​：8756 7907</view>
-    </view>
-
-    <view class="contact-detail">
-      <view class="detail-item">黄龙区党群服务中心</view>
-      <view class="detail-item">地址​：黄龙区玉林路70号</view>
-      <view class="detail-item">电话​：8794 5568​</view>
-    </view>
-
-    <view class="contact-detail">
-      <view class="detail-item">临河区卫生站</view>
-      <view class="detail-item">地址​：临河区羽南路65号</view>
-      <view class="detail-item">电话​：8898 7765​</view>
-    </view>
-
-    <view class="contact-detail">
-      <view class="detail-item">奉乐社工机构</view>
-      <view class="detail-item">地址​：临河区绍清路77号</view>
-      <view class="detail-item">电话​：8905 7508</view>
+    <view class="contact-detail" v-for="(item, index) in agent" :key="index">
+      <view class="detail-item">{{ item.name }}</view>
+      <view class="detail-item">地址​：{{ item.address }}</view>
+      <view class="detail-item" @click="dell(item.phone)"
+        >电话​：{{ item.phone }}</view
+      >
     </view>
 
     <!-- 关闭按钮 开始 -->
@@ -44,9 +16,50 @@
 
 <script>
 export default {
+  data() {
+    return {
+      agent: [
+        {
+          name: "阳光天使社工机构 ",
+          address: "新杨区青云路85号",
+          phone: "8458 0156",
+        },
+        {
+          name: "​新杨区居委会 ",
+          address: "新杨区林荫路88号",
+          phone: "​8587 0908",
+        },
+        {
+          name: "乐养老年护理机构  ",
+          address: "黄龙区玉山路75号",
+          phone: "8756 7907",
+        },
+        {
+          name: "黄龙区党群服务中心 ",
+          address: "黄龙区玉林路70号",
+          phone: "8794 5568​",
+        },
+        {
+          name: "临河区卫生站 ",
+          address: "临河区羽南路65号",
+          phone: "8898 7765​",
+        },
+        {
+          name: "奉乐社工机构 ",
+          address: "临河区绍清路77号",
+          phone: "8905 7508",
+        },
+      ],
+    };
+  },
   methods: {
     handleClose() {
       this.$emit("closeWindow");
+    },
+    dell(num) {
+      uni.makePhoneCall({
+        phoneNumber: num.replace(" ", ""),
+      });
     },
   },
 };
@@ -68,11 +81,15 @@ export default {
   .contact-detail {
     margin: 20rpx 0;
     color: #000;
-    
-  .detail-item:nth-child(1) {
-    font-weight: bold;
+
+    .detail-item:nth-child(1) {
+      font-weight: bold;
+    }
+    .detail-item:nth-child(3) {
+      color: #3ca8ff;
+      text-decoration: underline;
+    }
   }
-}
   button {
     width: 50%;
     margin: 20rpx auto 0;

@@ -164,7 +164,7 @@ export default {
     }
   },
   methods: {
-    formSubmit(e) {
+    async formSubmit(e) {
       // 检查表单中是否有空值，如果有 阻止提交
       if (Object.values(e.detail.value).includes("")) {
         uni.showToast({
@@ -189,43 +189,42 @@ export default {
         });
         return;
       }
+
       // 表单内容合法，可以提交
       uni.showLoading({
         title: "上传中"
       });
       const formContent = e.detail.value;
-      // 判断是长期招聘还是短期
-      function uploadForm(collection) {
-        db.collection(collection).add({
+
+      const do1 = await db
+        .collection(
+          `${this.postType === "long" ? "longTermJob" : "shortTermJob"}`
+        )
+        .add({
           data: {
             post: formContent,
             pTime: new Date().getTime()
-          },
-          success(res) {
-            uni.hideLoading();
-            // post添加到数据库成功
-            uni.showToast({
-              title: "发布成功",
-              icon: "success"
-            });
-            // 发布成功后返回上一级页面
-            setTimeout(() => {
-              wx.navigateBack({
-                delta: 1
-              });
-            }, 2000);
-          },
-          fail(err) {
-            uni.showToast({
-              title: "发布失败，请检查网络",
-              icon: "none"
-            });
           }
         });
+      if (do1.errMsg === "collection.add:ok") {
+        // 提交数据成功
+        uni.showToast({
+          title: "发布成功",
+          icon: "success"
+        });
+        // 发布成功后返回上一级页面
+        setTimeout(() => {
+          wx.navigateBack({
+            delta: 1
+          });
+        }, 1500);
+      } else {
+        // 提交数据失败
+        uni.showToast({
+          title: "发布失败，请检查网络",
+          icon: "none"
+        });
       }
-      this.postType === "long"
-        ? uploadForm("longTermJob")
-        : uploadForm("shortTermJob");
     },
     bindPickerChange(e) {
       this.index = e.target.value;
@@ -244,16 +243,15 @@ export default {
         this.isWorkPlaceOk = reg.test(msg);
       } else if (name === "posterName") {
         this.isNameOk = reg.test(msg);
-      } else if (name === "phone"){
+      } else if (name === "phone") {
         this.isPhoneOk = regPhone.test(msg);
       }
-    },
+    }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-
 .hire-form {
   .form-title {
     color: #000;

@@ -49,14 +49,18 @@ export default {
     SwiperAction,
   },
   onShow() {
-    this.syncData();
+    if (this.isMounted) {
+      this.syncData();
+    }
   },
   mounted() {
     this.syncData();
+    this.isMounted = true;
   },
   data() {
     return {
       isUserLogin: false,
+      isMounted: false,
     };
   },
 
@@ -93,12 +97,12 @@ export default {
       this.isUserLogin = !this.isUserLogin;
     },
     // 手指滑动跳转tab
-    handleSwip(e){
-      if(e.direction==="left"){
-         wx.switchTab({
+    handleSwip(e) {
+      if (e.direction === "left") {
+        wx.switchTab({
           url: "/pages/profile/index",
         });
-      }else {
+      } else {
         wx.switchTab({
           url: "/pages/index/index",
         });
