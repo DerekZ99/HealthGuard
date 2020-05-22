@@ -235,8 +235,9 @@ export default {
       background-color: #fff;
       border-radius: 30rpx;
       padding: 20rpx;
-      margin: 20rpx 0;
+      margin: 20rpx 0 120rpx;
       box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+
     }
   }
 

@@ -4,6 +4,7 @@ import request from "./utils/request"
 import chooseImg from "./utils/chooseImg"
 
 
+
 Vue.config.productionTip = false
 
 App.mpType = 'app'

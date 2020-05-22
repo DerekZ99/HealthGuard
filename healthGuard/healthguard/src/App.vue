@@ -1,4 +1,6 @@
 <script>
+const regeneratorRuntime = require("@/lib/regenerator-runtime/runtime");
+
 export default {
   onLaunch() {
     if (!wx.cloud) {

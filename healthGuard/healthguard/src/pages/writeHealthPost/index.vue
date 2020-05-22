@@ -12,9 +12,7 @@
           :class="{ warning: !isTitleOk }"
         />
         <!-- 警告信息 -->
-        <view class="warning-text" v-show="!isTitleOk"
-          >标题内容的长度需为2~15个字之间</view
-        >
+        <view class="warning-text" v-show="!isTitleOk">标题内容的长度需为2~15个字之间</view>
         <!-- 警告信息 -->
       </view>
 
@@ -30,9 +28,7 @@
           :class="{ warning: !isDetailOk }"
         />
         <!-- 警告信息 -->
-        <view class="warning-text" v-show="!isDetailOk"
-          >详情内容的需为20个字以上</view
-        >
+        <view class="warning-text" v-show="!isDetailOk">详情内容的需为20个字以上</view>
         <!-- 警告信息 -->
       </view>
 
@@ -46,9 +42,9 @@
         </view>
         <view class="img-right">
           {{
-            tempFilePaths.length === 0
-              ? "添加病情照片、患处、检查报告或其他资料"
-              : ""
+          tempFilePaths.length === 0
+          ? "添加病情照片、患处、检查报告或其他资料"
+          : ""
           }}
           <img
             class="healthImg"
@@ -58,11 +54,7 @@
             mode="aspectFill"
             @click="handleImgOption(index)"
           />
-          <view
-            v-if="tempFilePaths.length !== 0"
-            class="addImg"
-            @click="handleImg"
-          >
+          <view v-if="tempFilePaths.length !== 0" class="addImg" @click="handleImg">
             <img mode="widthFix" src="@/static/tabicon/zengjia.png" />
           </view>
         </view>
@@ -147,11 +139,11 @@ export default {
       valTitle: "",
       valDetail: "",
       valAge: null,
-      valPhone: null,
+      valPhone: null
     };
   },
   async onLoad() {
-    const do1 = await getStorage("healthPostDetail").catch((err) => {
+    const do1 = await getStorage("healthPostDetail").catch(err => {
       return;
     });
 
@@ -173,7 +165,7 @@ export default {
   onUnload() {
     // 离开页面时清除缓存
     wx.removeStorage({
-      key: "healthPostDetail",
+      key: "healthPostDetail"
     });
     this.isUpdateForm = false;
     this.postId = "";
@@ -186,7 +178,7 @@ export default {
         // 有空值
         uni.showToast({
           title: "提交失败，请填写完整的表单",
-          icon: "none",
+          icon: "none"
         });
         return;
       }
@@ -197,7 +189,7 @@ export default {
         // 有非法值
         uni.showToast({
           title: "提交失败，表单格式不正确",
-          icon: "none",
+          icon: "none"
         });
         return;
       }
@@ -208,23 +200,22 @@ export default {
       // 分叉口，当表单为编辑操作时往这里走，不执行下面的函数
       if (this.isUpdateForm) {
         this.updateImg(form);
-        return;
-      }
-
-      // 判断用户是否有上传头像
-      if (this.tempFilePaths.length !== 0) {
-        // 用户有上传头像，先把头像上传到云存储，然后拿到他的fileID并上传数据库
-        uni.showLoading({
-          title: "上传中",
-        });
-        // 这个函数被封装到了utils里面，res返回的是fileId数组
-        uploadImg(this.tempFilePaths).then((res) => {
-          // 上传图片完成，执行数据上传操作
-          this.uploadData(res, form);
-        });
       } else {
-        // 用户没有上传头像，直接调用上传数据的函数
-        this.uploadData([], form);
+        // 判断用户是否有上传头像
+        if (this.tempFilePaths.length !== 0) {
+          // 用户有上传头像，先把头像上传到云存储，然后拿到他的fileID并上传数据库
+          uni.showLoading({
+            title: "上传中"
+          });
+          // 这个函数被封装到了utils里面，res返回的是fileId数组
+          uploadImg(this.tempFilePaths).then(res => {
+            // 上传图片完成，执行数据上传操作
+            this.uploadData(res, form);
+          });
+        } else {
+          // 用户没有上传头像，直接调用上传数据的函数
+          this.uploadData([], form);
+        }
       }
     },
     // 提交数据
@@ -245,28 +236,28 @@ export default {
           docJob: "",
           docImg: "",
           docName: "",
-          replyed: false,
-        },
+          replyed: false
+        }
       });
       //判断提交结果
       if (do1.errMsg === "collection.add:ok") {
         // 提交成功
         uni.showToast({
           title: "提交成功",
-          icon: "success",
+          icon: "success"
         });
         setTimeout(() => {
           showModal(
             "您的询问信息已提交，医生们会尽快回复您。您可以在“我的”个人页面，点击“我的健康检查”查看信息的最新情况。"
           )
-            .then((res) => {
+            .then(res => {
               wx.switchTab({
-                url: "/pages/profile/index",
+                url: "/pages/profile/index"
               });
             })
             .catch(() => {
               wx.navigateBack({
-                delta: 1,
+                delta: 1
               });
             });
         }, 1000);
@@ -274,7 +265,7 @@ export default {
         // 提交失败
         uni.showToast({
           title: "提交失败，请检查网络",
-          icon: "none",
+          icon: "none"
         });
       }
     },
@@ -305,10 +296,10 @@ export default {
     //选择图片
     handleImg() {
       this.chooseImg(9)
-        .then((res) => {
+        .then(res => {
           this.tempFilePaths = [...this.tempFilePaths, ...res.tempFilePaths];
         })
-        .catch((err) => {
+        .catch(err => {
           return;
         });
     },
@@ -325,39 +316,39 @@ export default {
             if (that.tempFilePaths[index].includes("cloud://tryout")) {
               wx.cloud
                 .deleteFile({
-                  fileList: [that.tempFilePaths[index]],
+                  fileList: [that.tempFilePaths[index]]
                 })
-                .then((res) => {
+                .then(res => {
                   that.tempFilePaths.splice(index, 1);
                 })
-                .catch(err=>{
+                .catch(err => {
                   uni.showToast({
-                    title:"删除失败，请检查网络",
-                    icon:'none'
-                  })
-                })
+                    title: "删除失败，请检查网络",
+                    icon: "none"
+                  });
+                });
             } else {
               that.tempFilePaths.splice(index, 1);
             }
           } else if (res.cancel) {
             return;
           }
-        },
+        }
       });
     },
     // ------------更新表单的函数-----------
     // 更新图片
     updateImg(form) {
       if (this.tempFilePaths.indexOf("http")) {
-        let newImglist = this.tempFilePaths.filter((item) => {
+        let newImglist = this.tempFilePaths.filter(item => {
           return item.includes("http");
         });
         uploadImg(newImglist)
-          .then((res) => {
+          .then(res => {
             this.tempFilePaths.splice(-res.length, res.length, ...res);
             this.updateData(form, this.tempFilePaths);
           })
-          .catch((err) => {});
+          .catch(err => {});
       } else {
         // 图片数组里没有新增的图片，直接更新
         this.updateData(form, this.tempFilePaths);
@@ -367,7 +358,7 @@ export default {
     updateData(form, imgList) {
       db.collection("healthPost")
         .where({
-          _id: this.postId,
+          _id: this.postId
         })
         .update({
           data: {
@@ -377,28 +368,28 @@ export default {
             phone: parseInt(form.phone),
             title: form.title,
             img: imgList,
-            pTime: new Date().getTime(),
+            pTime: new Date().getTime()
           },
           success(res) {
             uni.showToast({
               title: "资料修改成功",
-              icon: "success",
+              icon: "success"
             });
             setTimeout(() => {
               wx.switchTab({
-                url: "/pages/profile/index",
+                url: "/pages/profile/index"
               });
             }, 1000);
           },
           fail(err) {
             uni.showToast({
               title: "提交失败，请检查网络",
-              icon: "none",
+              icon: "none"
             });
-          },
+          }
         });
-    },
-  },
+    }
+  }
 };
 </script>
 
